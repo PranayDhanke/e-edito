@@ -10,7 +10,7 @@ export const getMeHandler = async (req: Request, res: Response) => {
   if (!userId) {
     throw new AppError(401, "Unauthorized");
   }
-
+//taking the data from the service
   const user = await getUserService(userId);
 
   res.status(200).json({ success: true, data: user });
@@ -25,6 +25,7 @@ export const getUserHandler = async (req: Request, res: Response) => {
     throw new AppError(401, "Failed to get the id");
   }
 
+  //taking the data from the service
   const user = await getUserService(userId as string);
 
   res.status(200).json({ success: true, data: user });

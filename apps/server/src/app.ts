@@ -12,6 +12,7 @@ import { errorHandler } from "./middlewares/errorHandler";
 
 import clerkRoute from "./modules/auth/clerk/clerk.routes";
 import router from "./routes";
+import { clerkMiddleware } from "@clerk/express";
 
 //create the instance of the express into the app
 const app: Express = express();
@@ -55,6 +56,10 @@ app.get("/", (_, res) => {
     docs: "/api/v1",
   });
 });
+
+//adding clerk middleware
+app.use(clerkMiddleware());
+
 //adding the routes
 app.use("/api/v1", router);
 

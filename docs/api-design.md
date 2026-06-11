@@ -12,7 +12,7 @@ The API layer is responsible for:
 * Execution services
 
 Authentication is handled through Clerk.
-
+ 
 ---
 
 # Rooms

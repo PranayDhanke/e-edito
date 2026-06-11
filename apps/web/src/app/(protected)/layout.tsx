@@ -1,3 +1,4 @@
+import { QueryProvider } from "@/providers/tanstack-provider";
 import { SocketProvider } from "@/socket/socket-provider";
 import React from "react";
 
@@ -6,5 +7,11 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <SocketProvider>{children}</SocketProvider>;
+  return (
+    <main>
+      <SocketProvider>
+        <QueryProvider>{children}</QueryProvider>
+      </SocketProvider>
+    </main>
+  );
 }
