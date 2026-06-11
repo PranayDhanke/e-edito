@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-const router : Router = Router();
+import userRouter from "../modules/auth/user/user.route";
+import healthRouter from "./healthHandler";
 
-router.get("/health", (_, res) => {
-  res.json({
-    success: true,
-    message: "Server healthy",
-  });
-});
+const router: Router = Router();
+
+router.use("/health", healthRouter);
+
+router.use("/users", userRouter);
 
 export default router;

@@ -251,7 +251,7 @@ GET /api/users/me
 
 ```http
 GET /api/users/:userId
-```
+``` 
 
 ---
 

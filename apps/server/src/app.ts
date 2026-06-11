@@ -4,14 +4,14 @@ import helmet from "helmet";
 import compression from "compression";
 
 import { config } from "./config/config";
-import { limiter } from "./utils/limiter";
-import { logger } from "./lib/logger";
+import { limiter } from "./lib/limiter";
+import { requestLogger } from "./middlewares/requestLogger";
 
 import { notFoundHandler } from "./middlewares/not-found";
 import { errorHandler } from "./middlewares/errorHandler";
 
+import clerkRoute from "./modules/auth/clerk/clerk.routes";
 import router from "./routes";
-import { requestLogger } from "./middlewares/requestLogger";
 
 //create the instance of the express into the app
 const app: Express = express();
@@ -21,6 +21,9 @@ app.disable("x-powered-by");
 
 //adding helmet middleware for security
 app.use(helmet());
+
+//adding the clerk routes before json parsing for raw body verification
+app.use("/api/webhook", clerkRoute);
 
 //adding cors
 app.use(

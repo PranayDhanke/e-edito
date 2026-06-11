@@ -2,10 +2,10 @@ import http from "http";
 import app from "./app";
 import { config } from "./config/config";
 import { logger } from "./lib/logger";
-import { gracefulShutdown } from "./utils/shutdown";
 import { initializeSocket } from "./socket/socket";
 import { initializeRedis } from "./config/redis";
 import { connectDatabase } from "./config/database";
+import { gracefulShutdown } from "./lib/shutdown";
 
 //creating a new http server with express
 const server = http.createServer(app);
