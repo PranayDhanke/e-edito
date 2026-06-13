@@ -6,8 +6,10 @@ import { clerkMiddleware } from "@clerk/express";
 
 const router: Router = Router();
 
+router.use(requireAuth);
+
 //routes for the getme and the get user
-router.get("/me", requireAuth, handlerFunc(getMeHandler));
-router.get("/:userId", requireAuth, handlerFunc(getUserHandler));
+router.get("/me", handlerFunc(getMeHandler));
+router.get("/:userId", handlerFunc(getUserHandler));
 
 export default router;

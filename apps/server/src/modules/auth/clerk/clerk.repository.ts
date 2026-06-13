@@ -1,5 +1,5 @@
 import { User } from "@repo/shared-types";
-import { UserModel } from "../clerk.model";
+import { UserModel } from "../auth.model";
 
 const addUser = async (payload: User) => {
   return UserModel.create(payload);

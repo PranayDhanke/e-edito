@@ -14,9 +14,9 @@ export const languageEnum = z.enum([
 /**
  * Room status
  */
-export const roomStatusEnum = z.enum(["active", "ended", "archived"]);
+export const roomStatusEnum = z.enum(["active", "inactive", "closed"]);
 
-/**
+/** 
  * Base Room Schema
  */
 export const roomSchema = z.object({
@@ -54,6 +54,11 @@ export const roomSchema = z.object({
   status: roomStatusEnum,
 
   maxParticipants: z
+    .number()
+    .int("Must be a whole number")
+    .positive("Must be greater than 0"),
+
+  participantCount: z
     .number()
     .int("Must be a whole number")
     .positive("Must be greater than 0"),
@@ -98,6 +103,7 @@ export const createRoomFormSchema = createRoomSchema.omit({
   owner_id: true,
   room_code: true,
   status: true,
+  participantCount: true,
 });
 
 export type CreateRoomFormInput = z.infer<typeof createRoomFormSchema>;

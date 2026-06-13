@@ -23,8 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useCreateRoom } from "@/api/hooks/room/createRoom";
+import { useRouter } from "next/navigation";
 
 export default function CreateRoomForm() {
+  
+  const router = useRouter();
+
+  const { mutateAsync } = useCreateRoom();
+
   const form = useForm<CreateRoomFormInput>({
     resolver: zodResolver(createRoomFormSchema),
     defaultValues: {
@@ -39,8 +46,17 @@ export default function CreateRoomForm() {
     },
   });
 
-  const onSubmit = (data: CreateRoomFormInput) => {
-    console.log(data);
+  const onSubmit = async (data: CreateRoomFormInput) => {
+    try {
+      const res = await mutateAsync(data);
+      if (!res) console.log("no response");
+
+      const roomId = res.data.room_code;
+
+      router.push(`/dashboard/workspace${roomId}`)
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   return (
@@ -72,7 +88,9 @@ export default function CreateRoomForm() {
                     placeholder="JavaScript Interview Room"
                     aria-invalid={fieldState.invalid}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && (
+                    <FieldError errors={[fieldState.error]} />
+                  )}
                 </Field>
               )}
             />
@@ -91,7 +109,9 @@ export default function CreateRoomForm() {
                   onChange={(e) => field.onChange(Number(e.target.value))}
                   aria-invalid={fieldState.invalid}
                 />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -124,7 +144,10 @@ export default function CreateRoomForm() {
             name="language"
             control={form.control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid} className="w-full md:w-1/3">
+              <Field
+                data-invalid={fieldState.invalid}
+                className="w-full md:w-1/3"
+              >
                 <FieldLabel>Default Language</FieldLabel>
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger>
@@ -138,7 +161,9 @@ export default function CreateRoomForm() {
                     <SelectItem value="cpp">C++</SelectItem>
                   </SelectContent>
                 </Select>
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -157,7 +182,9 @@ export default function CreateRoomForm() {
                   className="font-mono text-sm bg-muted/30"
                   aria-invalid={fieldState.invalid}
                 />
-                {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {fieldState.invalid && (
+                  <FieldError errors={[fieldState.error]} />
+                )}
               </Field>
             )}
           />
@@ -167,7 +194,9 @@ export default function CreateRoomForm() {
 
         {/* Room Settings (Toggles Grid) */}
         <div>
-          <h3 className="text-sm font-medium text-muted-foreground mb-3">Room Permissions</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-3">
+            Room Permissions
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Public Room */}
             <Controller
@@ -176,12 +205,17 @@ export default function CreateRoomForm() {
               render={({ field }) => (
                 <Field className="flex items-start justify-between rounded-xl border p-4 bg-muted/10">
                   <div className="space-y-0.5 pr-2">
-                    <FieldLabel className="text-sm font-medium">Public</FieldLabel>
+                    <FieldLabel className="text-sm font-medium">
+                      Public
+                    </FieldLabel>
                     <FieldDescription className="text-xs leading-normal">
                       Anyone with the link can join.
                     </FieldDescription>
                   </div>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </Field>
               )}
             />
@@ -193,12 +227,17 @@ export default function CreateRoomForm() {
               render={({ field }) => (
                 <Field className="flex items-start justify-between rounded-xl border p-4 bg-muted/10">
                   <div className="space-y-0.5 pr-2">
-                    <FieldLabel className="text-sm font-medium">Audio</FieldLabel>
+                    <FieldLabel className="text-sm font-medium">
+                      Audio
+                    </FieldLabel>
                     <FieldDescription className="text-xs leading-normal">
                       Allow participants to speak.
                     </FieldDescription>
                   </div>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </Field>
               )}
             />
@@ -210,12 +249,17 @@ export default function CreateRoomForm() {
               render={({ field }) => (
                 <Field className="flex items-start justify-between rounded-xl border p-4 bg-muted/10">
                   <div className="space-y-0.5 pr-2">
-                    <FieldLabel className="text-sm font-medium">Video</FieldLabel>
+                    <FieldLabel className="text-sm font-medium">
+                      Video
+                    </FieldLabel>
                     <FieldDescription className="text-xs leading-normal">
                       Allow participants to share video.
                     </FieldDescription>
                   </div>
-                  <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
                 </Field>
               )}
             />
@@ -225,7 +269,12 @@ export default function CreateRoomForm() {
 
       {/* Form Action */}
       <div className="flex justify-end pt-2">
-        <Button type="submit" size="lg" className="w-full md:w-auto px-8" disabled={form.formState.isSubmitting}>
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full md:w-auto px-8"
+          disabled={form.formState.isSubmitting}
+        >
           Create Room
         </Button>
       </div>

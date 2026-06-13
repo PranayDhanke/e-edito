@@ -8,7 +8,7 @@ export const requireAuth = (
   next: NextFunction,
 ) => {
   const userId = getAuth(req);
-
+  
   if (!userId) {
     res.status(401).json({
       success: false,

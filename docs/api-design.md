@@ -6,13 +6,13 @@ This document defines all REST APIs used by e-edito.
 
 The API layer is responsible for:
 
-* Room management
-* Version management
-* User information
-* Execution services
+- Room management
+- Version management
+- User information
+- Execution services
 
 Authentication is handled through Clerk.
- 
+
 ---
 
 # Rooms
@@ -23,25 +23,6 @@ Authentication is handled through Clerk.
 
 ```http
 POST /api/rooms
-```
-
-### Request
-
-```json
-{
-  "name": "DSA Practice",
-  "description": "Interview preparation room",
-  "language": "typescript"
-}
-```
-
-### Response
-
-```json
-{
-  "roomId": "123",
-  "roomCode": "ABC123"
-}
 ```
 
 ---
@@ -55,14 +36,6 @@ GET /api/rooms/:roomId
 ```
 
 ---
-
-## Get Recent Rooms
-
-### Endpoint
-
-```http
-GET /api/rooms/recent
-```
 
 ---
 
@@ -105,7 +78,17 @@ Owner only.
 ### Endpoint
 
 ```http
-POST /api/rooms/:roomId/invite
+POST /api/rooms/:roomId/invite/:userId
+```
+
+---
+
+## get Participant
+
+### Endpoint
+
+```http
+POST /api/participants/:roomId
 ```
 
 ---
@@ -150,15 +133,6 @@ PATCH /api/rooms/:roomId/participants/:participantId
 POST /api/versions
 ```
 
-### Request
-
-```json
-{
-  "roomId": "123",
-  "name": "Before Refactor"
-}
-```
-
 ---
 
 ## Get Versions
@@ -177,6 +151,26 @@ GET /api/versions/:roomId
 
 ```http
 POST /api/versions/:versionId/restore
+```
+
+---
+
+# Actitity Log
+
+## Get Activity Log for room
+
+### Endpoint
+
+```http
+GET /api/logs/:roomId
+```
+
+## Get Activity Log for user
+
+### Endpoint
+
+```http
+GET /api/logs
 ```
 
 ---
@@ -201,24 +195,6 @@ GET /api/messages/:roomId
 
 ```http
 POST /api/execute
-```
-
-### Request
-
-```json
-{
-  "language": "typescript",
-  "code": "console.log('Hello World')"
-}
-```
-
-### Response
-
-```json
-{
-  "output": "Hello World",
-  "status": "SUCCESS"
-}
 ```
 
 ---
@@ -251,7 +227,7 @@ GET /api/users/me
 
 ```http
 GET /api/users/:userId
-``` 
+```
 
 ---
 
@@ -263,12 +239,4 @@ GET /api/users/:userId
 
 ```http
 GET /health
-```
-
-### Response
-
-```json
-{
-  "status": "ok"
-}
 ```

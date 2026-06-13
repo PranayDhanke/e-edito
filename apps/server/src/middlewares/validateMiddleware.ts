@@ -1,18 +1,21 @@
 import { NextFunction, Request, Response } from "express";
-import { AnyZodObject, ZodError } from "zod/v3";
 import { AppError } from "../utils/AppError";
+import { ZodError, ZodSchema } from "zod";
 
 //creating a middleware for the validatio purpose
 export const validate =
-  (schema: AnyZodObject) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (schema: ZodSchema) =>
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse(req.body);
+      const body = await req.body;
+      console.log(body);
+
+      schema.parse(body);
 
       next();
     } catch (err) {
       if (err instanceof ZodError) {
-        throw new AppError(400, "validation error");
+        throw new AppError(400, `validation error ${err} `);
       }
 
       next(err);

@@ -1,5 +1,5 @@
 import { User } from "@repo/shared-types";
-import { UserModel } from "../clerk.model";
+import { UserModel } from "../auth.model";
 
 //use repo to the data of the user
 export const getUserRepo = async (userId: string) => {
