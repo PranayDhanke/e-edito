@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { cursorFilters } from "@repo/shared-types";
 import { AppError } from "../../utils/AppError";
 import { LogService } from "./activity-log.service";
 
@@ -6,12 +7,13 @@ import { LogService } from "./activity-log.service";
 export const getUserLogHandler = async (req: Request, res: Response) => {
   //take the user id from the req header
   const userId = req.userId;
+  const filter: cursorFilters = req.query;
 
   if (!userId) {
     throw new AppError(401, "Unauthorized");
   }
 
-  const logs = await LogService.getUserLogService(userId);
+  const logs = await LogService.getUserLogService(userId, filter);
 
   res.status(200).json({
     success: true,
@@ -23,12 +25,13 @@ export const getUserLogHandler = async (req: Request, res: Response) => {
 export const getRoomLogHandler = async (req: Request, res: Response) => {
   //take the user id from the req header
   const roomCode = req.params.roomCode;
+  const filter: cursorFilters = req.query;
 
   if (!roomCode) {
     throw new AppError(401, "Unauthorized");
   }
 
-  const logs = await LogService.getUserLogService(roomCode as string);
+  const logs = await LogService.getRoomLogService(roomCode as string, filter);
 
   res.status(200).json({
     success: true,

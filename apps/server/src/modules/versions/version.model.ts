@@ -4,7 +4,7 @@ import { Schema, model, models, Types } from "mongoose";
 const versionSchema = new Schema(
   {
     room_code: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.String,
       ref: "Room",
       required: true,
       index: true,
@@ -29,8 +29,7 @@ const versionSchema = new Schema(
     },
 
     saved_by: {
-      type: Schema.Types.ObjectId,
-      ref: "Participant",
+      type: String,
       required: true,
       index: true,
     },

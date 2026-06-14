@@ -1,17 +1,14 @@
 import { CreateMessageInput } from "@repo/validation";
 import { cursorFilters } from "@repo/shared-types";
 import { MessageModel } from "./message.model";
-import { QueryFilter, Types } from "mongoose";
+import { Types } from "mongoose";
 
 const addMessageRepo = async (data: CreateMessageInput) => {
   return await MessageModel.insertOne({ ...data });
 };
 
 const getRoomMessagesRepo = async (roomCode: string, filter: cursorFilters) => {
-  const query: QueryFilter<{
-    room_code: string;
-    _id: Types.ObjectId;
-  }> = {
+  const query: Record<string, unknown> = {
     room_code: roomCode,
   };
 

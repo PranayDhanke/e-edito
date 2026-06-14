@@ -53,7 +53,7 @@ export default function CreateRoomForm() {
 
       const roomId = res.data.room_code;
 
-      router.push(`/dashboard/workspace${roomId}`)
+      router.push(`/dashboard/workspace/${roomId}`)
     } catch (err) {
       console.log(err);
     }

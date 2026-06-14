@@ -1,10 +1,10 @@
 import { Activity } from "@repo/validation";
-import { Schema, model, Types } from "mongoose";
+import { Schema, model } from "mongoose";
 
 const activityLogSchema = new Schema(
   {
     room_code: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.String,
       ref: "Room",
       required: true,
       index: true,
@@ -40,7 +40,11 @@ const activityLogSchema = new Schema(
     },
   },
   {
-    timestamps: false,
+    timestamps: {
+      createdAt: "created_at",
+      updatedAt: false,
+    },
+    versionKey: false,
   },
 );
 

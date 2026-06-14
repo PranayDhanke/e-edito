@@ -1,7 +1,7 @@
 import { CreateVersionCodeInput } from "@repo/validation";
 import { cursorFilters } from "@repo/shared-types";
 import { VersionCodeModel } from "./version.model";
-import { QueryFilter, Types } from "mongoose";
+import { Types } from "mongoose";
 
 //create a repo function to create a version
 const addVersionRepo = async (data: CreateVersionCodeInput) => {
@@ -9,10 +9,7 @@ const addVersionRepo = async (data: CreateVersionCodeInput) => {
 };
 
 const getVersions = async (roomCode: string, filter: cursorFilters) => {
-  const query: QueryFilter<{
-    room_code: string;
-    _id: Types.ObjectId;
-  }> = {
+  const query: Record<string, unknown> = {
     room_code: roomCode,
   };
 
@@ -23,7 +20,7 @@ const getVersions = async (roomCode: string, filter: cursorFilters) => {
   }
 
   const limit = Number(filter.limit) || 10;
-  const versions = await VersionCodeModel.find({ query })
+  const versions = await VersionCodeModel.find(query)
     .sort({ _id: -1 })
     .limit(limit + 1)
     .lean();

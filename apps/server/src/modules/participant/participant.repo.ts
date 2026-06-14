@@ -13,10 +13,16 @@ const getJoinedRoomsRepo = async (userId: string) => {
 
 //get room participant repo
 const getRoomParticipantsRepo = async (roomCode: string) => {
-  return await RoomParticipantModel.find({ room_code: roomCode });
+  const participants = await RoomParticipantModel.find({
+    room_code: roomCode,
+  }).populate("user_id", "name profile_image");
+  return participants;
 };
 
-const getRoomParticipantByUserRepo = async (roomCode: string, userId: string) => {
+const getRoomParticipantByUserRepo = async (
+  roomCode: string,
+  userId: string,
+) => {
   return await RoomParticipantModel.findOne({
     room_code: roomCode,
     user_id: userId,

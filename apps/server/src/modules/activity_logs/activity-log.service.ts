@@ -1,10 +1,11 @@
 import { CreateActivityInput } from "@repo/validation";
+import { cursorFilters } from "@repo/shared-types";
 import { activityRepo } from "./activity-log.repo";
 import { AppError } from "../../utils/AppError";
 
 //create log service
 const addLogService = async (data: CreateActivityInput) => {
-  const res = activityRepo.addActivityRepo(data);
+  const res = await activityRepo.addActivityRepo(data);
 
   if (!res) {
     throw new AppError(500, "Failed to add the activity");
@@ -14,8 +15,13 @@ const addLogService = async (data: CreateActivityInput) => {
 };
 
 //get log by roomId service
-const getRoomLogService = async (room_code: string) => {
-  const res = activityRepo.getRoomActivityRepo(room_code);
+const getRoomLogService = async (roomCode: string, reqFilter: cursorFilters) => {
+  const filter: cursorFilters = {
+    ...reqFilter,
+    limit: Number(reqFilter.limit) || 20,
+  };
+
+  const res = await activityRepo.getRoomActivityRepo(roomCode, filter);
 
   if (!res) {
     throw new AppError(500, "Failed to get the activity");
@@ -25,8 +31,13 @@ const getRoomLogService = async (room_code: string) => {
 };
 
 //get log by userid service
-const getUserLogService = async (userId: string) => {
-  const res = activityRepo.getRoomActivityRepo(userId);
+const getUserLogService = async (userId: string, reqFilter: cursorFilters) => {
+  const filter: cursorFilters = {
+    ...reqFilter,
+    limit: Number(reqFilter.limit) || 20,
+  };
+
+  const res = await activityRepo.getUserActivityRepo(userId, filter);
 
   if (!res) {
     throw new AppError(500, "Failed to get the activity");

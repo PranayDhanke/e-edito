@@ -4,7 +4,7 @@ import { Schema, model, Types } from "mongoose";
 const roomParticipantSchema = new Schema(
   {
     room_code: {
-      type: Schema.Types.ObjectId,
+      type: Schema.Types.String,
       ref: "Room",
       required: true,
       index: true,

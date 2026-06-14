@@ -36,18 +36,18 @@ router.get("/:roomId/participants", handlerFunc(getRoomParticipantsHandler));
 router.post("/:roomCode/join/:roomId", handlerFunc(joinRoomHandler));
 
 router.delete(
-  "/:roomId/participoant/:id/remove",
+  "/:roomId/participant/:id/remove",
   handlerFunc(deleteRoomParticipantHandler),
 );
 
 router.patch(
-  "/:roomId/participoant/:id/changerole",
+  "/:roomId/participant/:id/changerole",
   validate(updateRoomParticipantSchema),
   handlerFunc(updateRoomParticipantHandler),
 );
 
 router.post(
-  "/:roomId/participoant/:id/ban",
+  "/:roomId/participant/:id/ban",
   validate(createBannedParticipantFormSchema),
   handlerFunc(banRoomParticipantHandler),
 );
