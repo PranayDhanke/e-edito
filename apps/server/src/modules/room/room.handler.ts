@@ -20,7 +20,7 @@ export const createRoomHandler = async (req: Request, res: Response) => {
   const data: CreateRoomFormInput = req.body;
 
   if (!data) {
-    throw new AppError(401 , "req data not found")
+    throw new AppError(401, "req data not found");
   }
 
   const room = await roomService.createRoomService(data, userId);
@@ -66,6 +66,7 @@ export const getRoomIdHandler = async (req: Request, res: Response) => {
   });
 };
 
+//get particpant handler
 export const getRoomParticipantsHandler = async (
   req: Request,
   res: Response,
@@ -84,10 +85,14 @@ export const getRoomParticipantsHandler = async (
   });
 };
 
+//join room handler
 export const joinRoomHandler = async (req: Request, res: Response) => {
   const userId = req.userId;
   const roomCode = (req.params.roomCode || req.params.roomId) as string;
-  const invitedBy = req.query.invitedBy as string | undefined;
+  const invitedBy = (req.query.invitedBy || req.query.invited_by) as
+    | string
+    | undefined;
+  const role = req.query.role as string | undefined;
 
   if (!userId?.trim()) {
     throw new AppError(401, "Unauthorized");
@@ -101,6 +106,7 @@ export const joinRoomHandler = async (req: Request, res: Response) => {
     roomCode,
     userId,
     invitedBy?.trim() || null,
+    role?.trim() || null,
   );
 
   res.status(201).json({
@@ -109,7 +115,7 @@ export const joinRoomHandler = async (req: Request, res: Response) => {
   });
 };
 
-export const deleteRoomParticipantHandler = async (
+export const removeRoomParticipantHandler = async (
   req: Request,
   res: Response,
 ) => {
@@ -129,11 +135,31 @@ export const deleteRoomParticipantHandler = async (
     throw new AppError(400, "User id is required");
   }
 
-  await roomService.deleteRoomParticipantService(
+  await roomService.removeRoomParticipantService(
     roomCode,
     participantUserId,
     actorUserId,
   );
+
+  res.status(200).json({
+    success: true,
+    message: "Participant removed successfully",
+  });
+};
+
+export const levaveRoomHandler = async (req: Request, res: Response) => {
+  const userId = req.userId;
+  const roomCode = (req.params.roomCode || req.params.roomId) as string;
+
+  if (!userId?.trim()) {
+    throw new AppError(401, "Unauthorized");
+  }
+
+  if (!roomCode?.trim()) {
+    throw new AppError(400, "Room code is required");
+  }
+
+  await roomService.removeRoomParticipantService(roomCode, userId);
 
   res.status(200).json({
     success: true,

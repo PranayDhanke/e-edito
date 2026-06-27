@@ -1,6 +1,7 @@
 "use client";
 
-import { useGetRoomLogs } from "@/api/hooks/room/getLogs";
+import { useGetRoomLogs } from "@/api/hooks/logs/getLogs";
+
 
 const actionLabelMap: Record<string, string> = {
   ROOM_CREATED: "Room created",

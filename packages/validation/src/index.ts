@@ -9,3 +9,5 @@ export * from "./activity-log.schema";
 export * from "./banned-participant.schema";
 
 export * from "./message.schema";
+
+export * from "./socket.validation";

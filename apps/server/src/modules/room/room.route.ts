@@ -10,11 +10,12 @@ import { handlerFunc } from "../../utils/asyncHandler";
 import {
   banRoomParticipantHandler,
   createRoomHandler,
-  deleteRoomParticipantHandler,
   getRoomHandler,
   getRoomIdHandler,
   getRoomParticipantsHandler,
   joinRoomHandler,
+  levaveRoomHandler,
+  removeRoomParticipantHandler,
   updateRoomParticipantHandler,
 } from "./room.handler";
 
@@ -31,14 +32,16 @@ router.post(
 
 router.get("/", handlerFunc(getRoomIdHandler));
 
-router.get("/:roomId/participants", handlerFunc(getRoomParticipantsHandler));
+router.get("/:roomCode/participants", handlerFunc(getRoomParticipantsHandler));
 
 router.post("/:roomCode/join/:roomId", handlerFunc(joinRoomHandler));
 
 router.delete(
-  "/:roomId/participant/:id/remove",
-  handlerFunc(deleteRoomParticipantHandler),
+  "/:roomCode/participant/:id/remove",
+  handlerFunc(removeRoomParticipantHandler),
 );
+
+router.delete("/:roomCode/leave", handlerFunc(levaveRoomHandler));
 
 router.patch(
   "/:roomId/participant/:id/changerole",

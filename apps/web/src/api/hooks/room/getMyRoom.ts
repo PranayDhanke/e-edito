@@ -22,7 +22,9 @@ export const useGetMyRoom = () => {
       }
 
       //calling the user service which has fetch function
-      return await roomService.getMyRoom(token);
+      const rooms = await roomService.getMyRoom(token);
+
+      return rooms.data;
     },
   });
 };

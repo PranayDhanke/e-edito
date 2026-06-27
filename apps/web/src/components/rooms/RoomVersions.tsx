@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetRoomVersions } from "@/api/hooks/room/getVersions";
+import { useGetRoomVersions } from "@/api/hooks/version/getVersions";
 
 const formatDate = (value?: string) => {
   if (!value) {

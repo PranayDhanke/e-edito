@@ -14,6 +14,7 @@ import { versionService } from "../versions/version.service";
 import { LogService } from "../activity_logs/activity-log.service";
 import { RoomFilters } from "@repo/shared-types";
 import { bannedParticipantService } from "../banned_participant/banned-participant.service";
+import { redisRoomService } from "../../services/redis/room.redis";
 
 //creating service function to create a new room
 const createRoomService = async (
@@ -87,6 +88,9 @@ const createRoomService = async (
     );
   }
 
+  await redisRoomService.addRoom(roomCode, reqdata.code, reqdata.language);
+  await redisRoomService.addParticipant(roomCode, userId, "owner");
+
   return createRes;
 };
 
@@ -110,7 +114,7 @@ const getRoomIdService = async (userId: string, reqFilter: RoomFilters) => {
     limit: reqFilter.limit || 10,
   };
 
-  const res = await roomRepo.getRoomIdRepo(userId , filter);
+  const res = await roomRepo.getRoomIdRepo(userId, filter);
 
   if (!res) {
     throw new AppError(501, "error while getting the room details ");
@@ -119,6 +123,7 @@ const getRoomIdService = async (userId: string, reqFilter: RoomFilters) => {
   return res;
 };
 
+//function to get the participants in room
 const getRoomParticipantsService = async (roomCode: string) => {
   const room = await roomRepo.getRoomRepo(roomCode);
 
@@ -135,10 +140,12 @@ const getRoomParticipantsService = async (roomCode: string) => {
   return res;
 };
 
+//function to join new  user to the room
 const joinRoomService = async (
   roomCode: string,
   userId: string,
   invitedBy: string | null,
+  role: string | null,
 ) => {
   const room = await roomRepo.getRoomRepo(roomCode);
 
@@ -147,7 +154,10 @@ const joinRoomService = async (
   }
 
   const bannedParticipant =
-    await bannedParticipantService.getBannedParticipantService(roomCode, userId);
+    await bannedParticipantService.getBannedParticipantService(
+      roomCode,
+      userId,
+    );
 
   if (bannedParticipant) {
     throw new AppError(403, "participant is banned from this room");
@@ -157,16 +167,17 @@ const joinRoomService = async (
     await participantService.getRoomParticipantByUserService(roomCode, userId);
 
   if (existingParticipant) {
-    throw new AppError(409, "participant already joined this room");
+    return existingParticipant;
   }
 
   const data: JoinRoomParticipantInput = {
     room_code: roomCode,
-    role: "viewer",
+    role: role === "editor" ? "editor" : "viewer",
     invited_by: invitedBy,
   };
 
   const res = await participantService.joinParticipantService(data, userId);
+  await redisRoomService.addParticipant(data.room_code, userId, data.role);
 
   const logRes = await LogService.addLogService({
     action: "USER_JOINED",
@@ -185,10 +196,11 @@ const joinRoomService = async (
   return res;
 };
 
-const deleteRoomParticipantService = async (
+//function to remove the room participants
+const removeRoomParticipantService = async (
   roomCode: string,
   participantUserId: string,
-  actorUserId: string,
+  actorUserId?: string,
 ) => {
   const room = await roomRepo.getRoomRepo(roomCode);
 
@@ -201,15 +213,30 @@ const deleteRoomParticipantService = async (
     participantUserId,
   );
 
+  await redisRoomService.removeParticipant(roomCode, participantUserId);
+
+  if (actorUserId) {
+    const logRes = await LogService.addLogService({
+      action: "PARTICIPANT_REMOVED",
+      room_code: roomCode,
+      user_id: actorUserId,
+      metadata: {
+        participant_user_id: participantUserId,
+      },
+    });
+    if (!logRes) {
+      throw new AppError(501, "error while creating remove participant log");
+    }
+  }
+
   const logRes = await LogService.addLogService({
-    action: "PARTICIPANT_REMOVED",
+    action: "USER_LEFT",
     room_code: roomCode,
-    user_id: actorUserId,
     metadata: {
       participant_user_id: participantUserId,
     },
+    user_id: participantUserId,
   });
-
   if (!logRes) {
     throw new AppError(501, "error while creating remove participant log");
   }
@@ -217,6 +244,7 @@ const deleteRoomParticipantService = async (
   return res;
 };
 
+//function to update the room participant role
 const updateRoomParticipantService = async (
   roomCode: string,
   participantUserId: string,
@@ -252,6 +280,7 @@ const updateRoomParticipantService = async (
   return res;
 };
 
+//function to ban the user from the room
 const banRoomParticipantService = async (
   roomCode: string,
   participantUserId: string,
@@ -274,6 +303,8 @@ const banRoomParticipantService = async (
       roomCode,
       participantUserId,
     );
+
+    await redisRoomService.removeParticipant(roomCode, participantUserId);
   }
 
   const res = await bannedParticipantService.addBannedParticipantService({
@@ -298,7 +329,7 @@ const banRoomParticipantService = async (
   if (!logRes) {
     throw new AppError(501, "error while creating ban participant log");
   }
-
+ 
   return res;
 };
 
@@ -308,7 +339,7 @@ export const roomService = {
   getRoomIdService,
   getRoomParticipantsService,
   joinRoomService,
-  deleteRoomParticipantService,
+  removeRoomParticipantService,
   updateRoomParticipantService,
   banRoomParticipantService,
 };

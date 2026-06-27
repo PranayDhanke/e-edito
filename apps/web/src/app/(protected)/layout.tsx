@@ -7,13 +7,11 @@ export default function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  
-  
   return (
     <main>
-      <SocketProvider>
-        <QueryProvider>{children}</QueryProvider>
-      </SocketProvider>
+      <QueryProvider>
+        <SocketProvider>{children}</SocketProvider>
+      </QueryProvider>
     </main>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { roomService } from "@/api/services/roomService";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { RoomParticipantWithUser } from "@/components/rooms/roomTypes";
+import { participantService } from "@/api/services/participantService";
 
 //creating a hook to get data from the query
 export const useGetRoomParticiapnts = (roomCode: string) => {
@@ -23,7 +23,7 @@ export const useGetRoomParticiapnts = (roomCode: string) => {
         throw new Error("Failed to get the token");
       }
 
-      const data = await roomService.getParticipants(token, roomCode);
+      const data = await participantService.getParticipants(token, roomCode);
 
       //calling the user service which has fetch function
       return data.data as RoomParticipantWithUser[];

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { participantRoleEnum } from "./participant.schema";
 
 /**
  * Supported languages
@@ -16,7 +17,7 @@ export const languageEnum = z.enum([
  */
 export const roomStatusEnum = z.enum(["active", "inactive", "closed"]);
 
-/** 
+/**
  * Base Room Schema
  */
 export const roomSchema = z.object({
@@ -127,3 +128,5 @@ export const joinRoomSchema = z.object({
 });
 
 export type JoinRoomInput = z.infer<typeof joinRoomSchema>;
+
+

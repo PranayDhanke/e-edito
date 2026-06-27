@@ -1,22 +1,20 @@
 "use client";
 
-import { roomService } from "@/api/services/roomService";
+import { logService } from "@/api/services/logsService";
 import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 
-export interface RoomVersionItem {
+export interface RoomLogItem {
   _id: string;
   room_code: string;
-  name: string;
-  code: string;
-  saved_by: string;
-  language: string;
-  reason: string;
+  user_id: string;
+  action: string;
+  metadata: Record<string, unknown>;
   created_at?: string;
 }
 
-export interface RoomVersionResponse {
-  versions: RoomVersionItem[];
+export interface RoomLogResponse {
+  logs: RoomLogItem[];
   nextCursor: string | null;
   pagination: {
     limit: number;
@@ -24,11 +22,11 @@ export interface RoomVersionResponse {
   };
 }
 
-export const useGetRoomVersions = (roomCode: string) => {
+export const useGetRoomLogs = (roomCode: string) => {
   const { getToken } = useAuth();
 
   return useQuery({
-    queryKey: ["room-versions", roomCode],
+    queryKey: ["room-logs", roomCode],
     enabled: !!roomCode,
     queryFn: async () => {
       const token = await getToken();
@@ -37,8 +35,8 @@ export const useGetRoomVersions = (roomCode: string) => {
         throw new Error("Failed to get the token");
       }
 
-      const response = await roomService.getVersions(token, roomCode);
-      return response.data as RoomVersionResponse;
+      const response = await logService.getLogs(token, roomCode);
+      return response.data as RoomLogResponse;
     },
   });
 };

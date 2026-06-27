@@ -2,6 +2,7 @@ import { CreateRoomFormInput } from "@repo/validation";
 
 //creating a service for the room
 export const roomService = {
+  //add room service
   async addRoom(token: string, data: CreateRoomFormInput) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
       method: "POST",
@@ -19,6 +20,7 @@ export const roomService = {
     return response.json();
   },
 
+  //get room service
   async getRoom(token: string, roomCode: string) {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomCode}`,
@@ -37,6 +39,7 @@ export const roomService = {
     return response.json();
   },
 
+  //get my rooms service
   async getMyRoom(token: string) {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
       method: "GET",
@@ -52,57 +55,56 @@ export const roomService = {
     return response.json();
   },
 
-  async getParticipants(token: string, roomCode: string) {
+  //join room service
+  async joinRoom(
+    token: string,
+    roomCode: string,
+    role: string,
+    invitedBy: string,
+  ) {
+    const query = new URLSearchParams();
+
+    query.set("role", role);
+    query.set("invited_by", invitedBy);
+
+    const queryString = query.toString();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomCode}/participants`,
+      `${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomCode}/join${queryString ? `?${queryString}` : ""}`,
       {
-        method: "GET",
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       },
     );
 
+    const payload = await response.json().catch(() => null);
+
     if (!response.ok) {
-      throw new Error("Failed to fetch current user");
+      throw new Error(payload?.message || "Failed to join room");
     }
 
-    return response.json();
+    return payload;
   },
 
-  async getVersions(token: string, roomCode: string) {
+  //join room service
+  async leaveRoom(token: string, roomCode: string) {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/versions/${roomCode}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/rooms/${roomCode}/leave`,
       {
-        method: "GET",
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
       },
     );
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch room versions");
-    }
-
-    return response.json();
-  },
-
-  async getLogs(token: string, roomCode: string) {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/logs/${roomCode}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
+    const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
-      throw new Error("Failed to fetch room activity");
+      throw new Error(payload?.message || "Failed to leave room");
     }
 
-    return response.json();
+    return payload;
   },
 };

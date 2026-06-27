@@ -21,17 +21,22 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       //take the token from the clerk
       const token = await getToken();
 
+      if (!token) {
+        return;
+      }
+
       const socketInstance = getSocket(token!);
 
-      socketInstance?.connect();
+      socketInstance.connect();
 
-      setSocket(socketInstance!);
+      setSocket(socketInstance);
     };
 
     connect();
 
     return () => {
       disconnectSocket();
+      setSocket(null);
     };
   }, [isSignedIn, getToken]);
 

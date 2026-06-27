@@ -27,7 +27,7 @@ const getRoomIdRepo = async (userId: string, filter: RoomFilters) => {
   }
 
   //search filter
-  if (filter.search) {
+  if (filter.search?.trim()) {
     query.name = {
       $regex: filter.search,
       $options: "i",
@@ -44,11 +44,14 @@ const getRoomIdRepo = async (userId: string, filter: RoomFilters) => {
     query.language = filter.language;
   }
 
+  //set user id
+  query.owner_id = userId;
+
   //take the page and limit
   const limit = filter.limit || 10;
 
   //get the data with the pagination
-  const rooms = await RoomModel.find({ owner_id: userId, query })
+  const rooms = await RoomModel.find(query)
     .sort({ _id: -1 })
     .limit(limit + 1)
     .lean();

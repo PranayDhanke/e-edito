@@ -9,3 +9,10 @@ export interface User {
   created_at: Date;
   updated_at: Date;
 }
+
+export interface Member {
+  _id: string; // Clerk User ID
+  name: string;
+  profile_image: string;
+  role: string;
+}

@@ -10,8 +10,11 @@ export const SocketEvent = {
   CODE_CHANGE: "code-change",
   REMOTE_CODE_CHANGE: "remote-code-change",
   CURSOR_CHANGE: "cursor-change",
+  INITIAL_CODE: "initial-code",
   REMOTE_CURSOR_CHANGE: "remote-cursor-change",
   SYNC_DOCUMENT: "sync-document",
   ERROR: "error",
   ROOM_STATE: "room-state",
+  AWARENESS_UPDATE : "awareness:update",
+  REMOTE_AWARENESS_UPDATE : "remote:awareness:update",
 };

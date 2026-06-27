@@ -1,13 +1,17 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const isProtectedRouter = createRouteMatcher(["/dashboard(.)"]);
+const isProtectedRoute = createRouteMatcher([
+  "/dashboard(.*)",
+  "/join-room(.*)",
+]);
 
-export default clerkMiddleware(async (auth, req) => {
-  if (!isProtectedRouter) {
-    await auth.protect();
+export const proxy = clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) {
+    await auth.protect({
+      unauthenticatedUrl: new URL("/auth/sign-in", req.url).toString(),
+    });
   }
 });
-
 export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
