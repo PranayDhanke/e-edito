@@ -39,8 +39,8 @@ const MediaTile = ({
   }, [stream]);
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-border/60 bg-background/80">
-      <div className="aspect-video bg-slate-950/90">
+    <div className="overflow-hidden rounded-xl border border-border/60 bg-background/60">
+      <div className="aspect-video bg-slate-950/95 flex items-center justify-center">
         <video
           ref={mediaRef}
           autoPlay
@@ -49,12 +49,17 @@ const MediaTile = ({
           className={`h-full w-full object-cover ${hasVideo ? "" : "hidden"}`}
         />
         {!hasVideo && (
-          <div className="flex h-full items-center justify-center px-4 text-center text-sm text-slate-200">
-            Audio connected
+          <div className="flex h-full items-center justify-center px-4 text-center">
+            <div className="text-xs text-slate-300">
+              <div className="rounded-full w-12 h-12 bg-slate-800 flex items-center justify-center mx-auto mb-2">
+                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 animate-pulse" />
+              </div>
+              <p>Audio connected</p>
+            </div>
           </div>
         )}
       </div>
-      <div className="border-t border-border/60 px-4 py-3 text-sm font-medium text-foreground">
+      <div className="border-t border-border/40 px-3 py-2 text-xs font-semibold text-foreground truncate">
         {label}
       </div>
     </div>
@@ -436,25 +441,16 @@ const RoomCall = ({
   }
 
   return (
-    <section className="rounded-[2rem] border border-border/60 bg-card/85 p-5 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.4)] backdrop-blur">
-      <div className="mb-4">
-        <h2 className="font-heading text-xl font-semibold">Room Call</h2>
-        <p className="text-sm text-muted-foreground">
-          Live audio and video for everyone in this room.
-        </p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <MediaTile label="You" muted stream={localStream} />
-        {remoteStreams.map(({ stream, userId }) => (
-          <MediaTile
-            key={userId}
-            label={getParticipantName(userId)}
-            stream={stream}
-          />
-        ))}
-      </div>
-    </section>
+    <div className="grid gap-3">
+      <MediaTile label="You" muted stream={localStream} />
+      {remoteStreams.map(({ stream, userId }) => (
+        <MediaTile
+          key={userId}
+          label={getParticipantName(userId)}
+          stream={stream}
+        />
+      ))}
+    </div>
   );
 };
 

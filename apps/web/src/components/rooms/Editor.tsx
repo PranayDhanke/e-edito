@@ -119,7 +119,20 @@ const MonacoEditor = ({ initialCode }: { initialCode: Uint8Array }) => {
     new MonacoBinding(yText, model, new Set([editor]), awareness);
   };
 
-  return <Editor onMount={handleEditorMount} height={"60vh"} />;
+  return (
+    <Editor 
+      onMount={handleEditorMount} 
+      height="100%"
+      theme="vs-dark"
+      options={{
+        minimap: { enabled: true },
+        fontSize: 14,
+        fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace",
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+      }}
+    />
+  );
 };
 
 export default MonacoEditor;
