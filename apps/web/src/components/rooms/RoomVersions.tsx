@@ -18,54 +18,61 @@ const RoomVersions = ({ roomCode }: { roomCode: string }) => {
 
   if (isLoading) {
     return (
-      <div className="rounded-[2rem] border border-border/60 bg-card/85 p-5">
-        <p className="text-sm text-muted-foreground">Loading versions...</p>
+      <div className="flex items-center justify-center h-full p-4">
+        <div className="text-center">
+          <div className="animate-spin w-4 h-4 rounded-full border-2 border-border border-t-primary mx-auto mb-2" />
+          <p className="text-xs text-muted-foreground">Loading versions...</p>
+        </div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-[2rem] border border-destructive/30 bg-destructive/5 p-5 text-sm text-destructive">
-        {error.message}
+      <div className="flex items-center justify-center h-full p-4">
+        <div className="text-center">
+          <p className="text-xs text-destructive">Error loading versions</p>
+          <p className="text-xs text-muted-foreground mt-1">{error.message}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data?.versions?.length) {
+    return (
+      <div className="flex items-center justify-center h-full p-4">
+        <div className="text-center">
+          <p className="text-xs text-muted-foreground">No saved versions</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 p-3 overflow-y-auto h-full">
         {data?.versions?.map((version) => (
           <article
             key={version._id}
-            className="rounded-2xl border border-border/60 bg-background/85 p-4"
+            className="rounded-md border border-border/30 bg-background/60 hover:bg-background/80 transition-colors p-3 text-xs cursor-pointer group"
           >
-            <div className="mb-2 flex items-start justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-foreground">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground truncate">
                   {version.name}
                 </p>
-                <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                  {version.language}
+                <p className="text-muted-foreground mt-0.5 line-clamp-1">
+                  {version.reason || "No description"}
                 </p>
               </div>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-muted-foreground text-xs flex-shrink-0">
                 {formatDate(version.created_at)}
               </span>
             </div>
-            <p className="mb-3 text-sm text-muted-foreground">
-              {version.reason || "No reason provided"}
-            </p>
-            <pre className="overflow-x-auto rounded-xl bg-slate-950 px-3 py-2 text-xs text-slate-100">
-              <code>{version.code.slice(0, 160) || "// Empty version snapshot"}</code>
-            </pre>
+            <div className="mt-1 font-mono text-xs text-muted-foreground truncate">
+              {version.code.slice(0, 60)}...
+            </div>
           </article>
         ))}
-
-        {!data?.versions?.length && (
-          <div className="rounded-2xl border border-dashed border-border/70 px-4 py-6 text-center text-sm text-muted-foreground">
-            No saved versions yet.
-          </div>
-        )}
     </div>
   );
 };
