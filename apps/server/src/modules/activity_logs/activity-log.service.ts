@@ -34,7 +34,7 @@ const getRoomLogService = async (roomCode: string, reqFilter: cursorFilters) => 
 const getUserLogService = async (userId: string, reqFilter: cursorFilters) => {
   const filter: cursorFilters = {
     ...reqFilter,
-    limit: Number(reqFilter.limit) || 20,
+    limit: Number(reqFilter.limit) || 10,
   };
 
   const res = await activityRepo.getUserActivityRepo(userId, filter);

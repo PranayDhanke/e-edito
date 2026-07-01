@@ -95,7 +95,22 @@ const createRoomService = async (
 };
 
 //creating a service function to get the room details
-const getRoomService = async (roomCode: string) => {
+const getRoomService = async (roomCode: string, userId?: string) => {
+  if (userId) {
+    const participant =
+      await participantService.getRoomParticipantByUserService(
+        roomCode,
+        userId,
+      );
+
+    if (!participant) {
+      throw new AppError(
+        501,
+        "Unauthorized room entry please join as participant",
+      );
+    }
+  }
+
   const res = await roomRepo.getRoomRepo(roomCode);
 
   if (!res) {
@@ -329,7 +344,7 @@ const banRoomParticipantService = async (
   if (!logRes) {
     throw new AppError(501, "error while creating ban participant log");
   }
- 
+
   return res;
 };
 

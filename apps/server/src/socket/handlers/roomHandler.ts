@@ -2,6 +2,7 @@ import { SocketEvent } from "@repo/shared-types";
 import { Server, Socket } from "socket.io";
 import { JoinSocketRoomInput, joinSocketRoomSchema } from "@repo/validation";
 import { roomService } from "../services/room.service";
+import { reconnectService } from "../services/reconnect.service";
 
 export const handleRoomConnection = async (
   io: Server,
@@ -29,6 +30,8 @@ export const handleRoomConnection = async (
     });
   }
 
+  reconnectService.clearPendingDisconnect(data.room_code, id);
+
   await roomService.roomConnectionService(io, socket, id, data);
 };
 
@@ -54,5 +57,37 @@ export const handleRoomDisconnect = async (io: Server, socket: Socket) => {
     });
   }
 
-  await roomService.roomDisconnectionService(io, socket, id, roomCode);
+  socket.data.isLeavingRoom = true;
+
+  try {
+    await roomService.roomDisconnectionService(io, socket, id, roomCode);
+  } finally {
+    socket.data.isLeavingRoom = false;
+  }
+};
+
+export const handleUserLeft = async (
+  io: Server,
+  socket: Socket,
+  userId: string,
+) => {
+  //check if id exists
+  if (!userId) {
+    return socket.emit(SocketEvent.ERROR, {
+      code: "AUTHORIZATION_ERROR",
+      message: "user id not found",
+    });
+  }
+
+  //validate the room code
+  const roomCode = socket.data.roomCode;
+
+  if (!roomCode) {
+    return socket.emit(SocketEvent.ERROR, {
+      code: "VALIDATION_ERROR",
+      message: "Room code not found",
+    });
+  }
+
+  await roomService.userDisconnectService(io, socket, userId, roomCode);
 };

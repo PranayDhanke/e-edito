@@ -3,7 +3,7 @@ import { logger } from "../lib/logger";
 import { pubClient, redis, subClient } from "../config/redis";
 import { Server as ioServer } from "socket.io";
 import { disconnectDatabase } from "../config/database";
-import { userWorker } from "../modules/auth/clerk/clerk.worker";
+import { closeWorkers } from "../infrastructure/worker";
 
 //adding fixed timeout for the shutdown
 const shutdown_timeout = 10_000;
@@ -60,8 +60,8 @@ export async function gracefulShutdown(server: httpServer, io: ioServer) {
     logger.info("databse connections closed");
 
     //closing the workers
-    await userWorker.close();
-    logger.info("user worker closed");
+    await closeWorkers();
+    logger.info("workers closed");
 
     //closing the redis connection
     await Promise.all([redis.quit(), pubClient.quit(), subClient.quit()]);

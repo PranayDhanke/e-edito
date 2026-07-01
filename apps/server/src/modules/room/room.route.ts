@@ -34,7 +34,7 @@ router.get("/", handlerFunc(getRoomIdHandler));
 
 router.get("/:roomCode/participants", handlerFunc(getRoomParticipantsHandler));
 
-router.post("/:roomCode/join/:roomId", handlerFunc(joinRoomHandler));
+router.post("/:roomCode/join", handlerFunc(joinRoomHandler));
 
 router.delete(
   "/:roomCode/participant/:id/remove",

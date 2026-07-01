@@ -1,4 +1,5 @@
 import { CreateRoomFormInput } from "@repo/validation";
+import { RoomFilters } from "@repo/shared-types";
 
 //creating a service for the room
 export const roomService = {
@@ -13,7 +14,7 @@ export const roomService = {
       body: JSON.stringify(data),
     });
 
-    if (!response.ok) {
+    if (!response.ok) { 
       throw new Error("Failed to fetch current user");
     }
 
@@ -33,20 +34,45 @@ export const roomService = {
     );
 
     if (!response.ok) {
-      throw new Error("Failed to fetch current user");
+      throw new Error("Failed to fetch room please try again from the links");
     }
 
     return response.json();
   },
 
   //get my rooms service
-  async getMyRoom(token: string) {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/rooms`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
+  async getMyRoom(token: string, filters?: RoomFilters) {
+    const query = new URLSearchParams();
+
+    if (filters?.cursor) {
+      query.set("cursor", filters.cursor);
+    }
+
+    if (filters?.limit) {
+      query.set("limit", String(filters.limit));
+    }
+
+    if (filters?.search?.trim()) {
+      query.set("search", filters.search.trim());
+    }
+
+    if (filters?.status && filters.status !== "all") {
+      query.set("status", filters.status);
+    }
+
+    if (filters?.language && filters.language !== "all") {
+      query.set("language", filters.language);
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/rooms${query.toString() ? `?${query.toString()}` : ""}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       },
-    });
+    );
 
     if (!response.ok) {
       throw new Error("Failed to fetch current user");

@@ -2,23 +2,21 @@
 
 import { useGetRoom } from "@/api/hooks/room/getRoomDetail";
 import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useSocket } from "@/socket/socket-provider";
-import { SocketEvent } from "@repo/shared-types";
+import { Member, SocketEvent } from "@repo/shared-types";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useAuth, useUser } from "@clerk/nextjs";
-import { useQueryClient } from "@tanstack/react-query";
-import { roomService } from "@/api/services/roomService";
-import { LogOut } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
+import { Copy, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useLeaveRoom } from "@/api/hooks/room/leaveRoom";
 import InviteButton from "@/components/rooms/InviteButton";
 import { Button } from "@/components/ui/button";
-import MonacoEditorComponent from "@/components/rooms/Editor";
 import Participant from "@/components/rooms/Participant";
 import RoomVersions from "@/components/rooms/RoomVersions";
-import RoomActivity from "@/components/rooms/RoomActivity";
 import MonacoEditor from "@/components/rooms/Editor";
+import RoomCall from "@/components/rooms/RoomCall";
+import { RoomToolsPanel } from "@/components/rooms/RoomToolsPanel";
 
 const statCardStyles = [
   "from-[#fff3d6] via-[#fff8ea] to-[#fffef8] text-amber-950",
@@ -35,6 +33,13 @@ const RoomWorkspace = () => {
   //get the search parasm and param
   const param = useParams();
   const queryParams = useSearchParams();
+
+  const [participants, setParticipants] = useState<Member[]>([]);
+  const [initialCode, setInitialCode] = useState<Uint8Array>();
+  const [isToolsPanelOpen, setIsToolsPanelOpen] = useState(false);
+  const [toolsDefaultTab, setToolsDefaultTab] = useState<"invite" | "logs">(
+    "invite",
+  );
 
   const room_code = param.roomId?.[0] as string;
 
@@ -78,21 +83,42 @@ const RoomWorkspace = () => {
     console.log("socket error", payload);
   }, []);
 
+  const handleRoomJoin = useCallback(
+    async (participant: Member[]) => {
+      setParticipants(participant);
+    },
+    [],
+  );
+
+  const handleInitialCode = (update: Uint8Array) => {
+    setInitialCode(update);
+  };
+
   useEffect(() => {
     if (!socket || !room_code) {
       return;
     }
 
-    socket.emit(SocketEvent.JOIN_ROOM, { room_code, role });
-
     socket.on(SocketEvent.ERROR, handleSocketError);
+    socket.on(SocketEvent.ROOM_JOINED, handleRoomJoin);
+    socket.on(SocketEvent.INITIAL_CODE, handleInitialCode);
+
+    if (socket.connected) {
+      socket.emit(SocketEvent.JOIN_ROOM, { room_code, role });
+    } else {
+      socket.once("connect", () => {
+        socket.emit(SocketEvent.JOIN_ROOM, { room_code, role });
+      });
+    }
 
     return () => {
       socket.off(SocketEvent.ERROR, handleSocketError);
+      socket.off(SocketEvent.ROOM_JOINED, handleRoomJoin);
+      socket.off(SocketEvent.INITIAL_CODE, handleInitialCode);
     };
-  }, [handleSocketError, role, room_code, socket]);
+  }, [handleRoomJoin, handleSocketError, role, room_code, socket]);
 
-  if (isLoading) {
+  if (isLoading && !participants && !initialCode) {
     return (
       <div className="min-h-[70vh] rounded-[2rem] border border-border/60 bg-card/70 p-8 shadow-sm">
         <p className="text-sm text-muted-foreground">
@@ -115,7 +141,7 @@ const RoomWorkspace = () => {
     },
     {
       label: "Participants",
-      value: `${0}/${data?.maxParticipants || 0}`,
+      value: `${participants.length}/${data?.maxParticipants || 0}`,
       helper: "Live seats in use",
     },
     {
@@ -128,7 +154,7 @@ const RoomWorkspace = () => {
   if (error) {
     return (
       <div className="rounded-[2rem] border border-destructive/30 bg-destructive/5 p-8 text-sm text-destructive">
-        Error loading room
+        Error loading room {error.message}
       </div>
     );
   }
@@ -142,20 +168,48 @@ const RoomWorkspace = () => {
   }
 
   return (
-    <div>
-      <div>
-        <h1>Links</h1>
-        {data?.owner_id === user?.id ? (
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <RoomToolsPanel
+        key={`${room_code}-${toolsDefaultTab}-${isToolsPanelOpen ? "open" : "closed"}`}
+        open={isToolsPanelOpen}
+        onClose={() => setIsToolsPanelOpen(false)}
+        defaultTab={toolsDefaultTab}
+        roomCode={room_code}
+        userId={data?.owner_id || ""}
+        audioStatus={!!data?.is_audio_enabled}
+        videoStatus={!!data?.is_video_enabled}
+        isOwner={data?.owner_id === user?.id}
+      />
+
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            Active workspace
+          </p>
+          <h1 className="mt-2 font-heading text-2xl font-semibold text-foreground">
+            {data?.name || "Room workspace"}
+          </h1>
+        </div>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              await navigator.clipboard.writeText(room_code);
+              toast.success("Room code copied");
+            }}
+          >
+            <Copy className="size-4" />
+            Copy room code
+          </Button>
           <InviteButton
-            roomCode={room_code}
-            userId={data.owner_id}
-            audioStatus={data.is_audio_enabled}
-            videoStatus={data.is_video_enabled}
+            onClick={() => {
+              setToolsDefaultTab(data?.owner_id === user?.id ? "invite" : "logs");
+              setIsToolsPanelOpen(true);
+            }}
           />
-        ) : (
-          ""
-        )}
+        </div>
       </div>
+
       <div className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-[radial-gradient(circle_at_top_left,_rgba(255,222,156,0.35),_transparent_30%),linear-gradient(180deg,_rgba(255,255,255,0.96),_rgba(248,250,252,0.98))] p-4 shadow-[0_32px_120px_-48px_rgba(15,23,42,0.45)] md:p-6">
         <div className="absolute inset-x-0 top-0 h-40 bg-[linear-gradient(90deg,rgba(249,115,22,0.08),rgba(14,165,233,0.06),rgba(16,185,129,0.06))]" />
 
@@ -231,19 +285,33 @@ const RoomWorkspace = () => {
                   </span>
                 </div>
                 <div className="overflow-hidden rounded-[1.5rem] border border-slate-800/70">
-                  <MonacoEditor />
+                  {!initialCode ? (
+                    "loading..."
+                  ) : (
+                    <MonacoEditor initialCode={initialCode} />
+                  )}
                 </div>
               </div>
             </div>
 
             <aside className="space-y-6">
-              <Participant
-                roomCode={room_code}
+              <RoomCall
                 currentUserId={user?.id}
-                isOwner={data?.owner_id === user?.id}
+                isAudioEnabled={data?.is_audio_enabled}
+                isVideoEnabled={data?.is_video_enabled}
+                participants={participants}
               />
+              {!participants ? (
+                "loading..."
+              ) : (
+                <Participant
+                  roomCode={room_code}
+                  currentUserId={user?.id}
+                  isOwner={data?.owner_id === user?.id}
+                  participants={participants}
+                />
+              )}
               <RoomVersions roomCode={room_code} />
-              <RoomActivity roomCode={room_code} />
             </aside>
           </section>
         </div>

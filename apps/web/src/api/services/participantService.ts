@@ -14,7 +14,7 @@ export const participantService = {
       throw new Error("Failed to fetch current user");
     }
 
-    return response.json();
+    return response.json(); 
   },
 
   async removeParticipant(token: string, roomCode: string, userId: string) {
@@ -31,7 +31,9 @@ export const participantService = {
     const payload = await response.json().catch(() => null);
 
     if (!response.ok) {
+      console.log(response);
       throw new Error(payload?.message || "Failed to remove participant");
+      
     }
 
     return payload;

@@ -9,7 +9,34 @@ import { SocketEvent } from "@repo/shared-types";
 import { Awareness } from "y-protocols/awareness";
 import { useUser } from "@clerk/nextjs";
 
-const MonacoEditor = () => {
+const toUint8Array = (value: unknown) => {
+  if (value instanceof Uint8Array) {
+    return value;
+  }
+
+  if (value instanceof ArrayBuffer) {
+    return new Uint8Array(value);
+  }
+
+  if (Array.isArray(value)) {
+    return Uint8Array.from(value);
+  }
+
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "type" in value &&
+    "data" in value &&
+    (value as { type?: string }).type === "Buffer" &&
+    Array.isArray((value as { data?: unknown }).data)
+  ) {
+    return Uint8Array.from((value as { data: number[] }).data);
+  }
+
+  return null;
+};
+
+const MonacoEditor = ({ initialCode }: { initialCode: Uint8Array }) => {
   //socket
   const socket = useSocket();
   const { user, isSignedIn } = useUser();
@@ -32,14 +59,26 @@ const MonacoEditor = () => {
   }, [user, isSignedIn]);
 
   const handleRemoteUpdate = (code: any) => {
-    const update = new Uint8Array(code);
+    const update = toUint8Array(code);
 
-    Y.applyUpdate(doc, update);
+    if (!update) {
+      return;
+    }
+
+    Y.applyUpdate(doc, update, "remote-sync");
   };
 
-  const handleInitialCode = (update: Uint8Array) => {
-    Y.applyUpdate(doc, new Uint8Array(update));
-  };
+  useEffect(() => {
+    if (!initialCode) return;
+
+    const update = toUint8Array(initialCode);
+
+    if (!update) {
+      return;
+    }
+
+    Y.applyUpdate(doc, update, "initial-sync");
+  }, [doc, initialCode]);
 
   const handleAwarenessChange = () => {
     
@@ -48,13 +87,16 @@ const MonacoEditor = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleUpdate = (code: Uint8Array) => {
+    const handleUpdate = (code: Uint8Array, origin: unknown) => {
+      if (origin === "initial-sync" || origin === "remote-sync") {
+        return;
+      }
+
       socket.emit(SocketEvent.CODE_CHANGE, code);
     };
 
     doc.on("update", handleUpdate);
 
-    socket.on(SocketEvent.INITIAL_CODE, handleInitialCode);
     socket.on(SocketEvent.REMOTE_CODE_CHANGE, handleRemoteUpdate);
 
     awareness.on("change", handleAwarenessChange);
@@ -62,7 +104,6 @@ const MonacoEditor = () => {
     return () => {
       doc.off("update", handleUpdate);
       socket.off(SocketEvent.REMOTE_CODE_CHANGE, handleRemoteUpdate);
-      socket.off(SocketEvent.INITIAL_CODE, handleInitialCode);
       awareness.off("change", handleAwarenessChange);
     };
   }, [socket, doc, awareness]);

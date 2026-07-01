@@ -33,6 +33,12 @@ export const createRoomHandler = async (req: Request, res: Response) => {
 
 //room handler to get the room detail
 export const getRoomHandler = async (req: Request, res: Response) => {
+  const userId = req.userId;
+
+  if (!userId?.trim()) {
+    throw new AppError(401, "Unauthorized");
+  }
+
   //take the room id from the params
   const roomCode = req.params.roomCode as string;
 
@@ -40,7 +46,7 @@ export const getRoomHandler = async (req: Request, res: Response) => {
     throw new AppError(401, "Could not find the room code");
   }
 
-  const room = await roomService.getRoomService(roomCode);
+  const room = await roomService.getRoomService(roomCode, userId);
 
   res.status(201).json({
     success: true,

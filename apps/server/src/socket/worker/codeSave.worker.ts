@@ -1,3 +1,4 @@
+import { logger } from "../../lib/logger";
 import { redisRoomService } from "../../services/redis/room.redis";
 import { codeService } from "../services/code.service";
 
@@ -6,12 +7,20 @@ export const startCodeSave = (time: number) =>
   setInterval(async () => {
     //get the all saved room
     for (const roomCode of codeService.getSavingRooms()) {
-      //get the code fro the each room
-      const code = codeService.getCode(roomCode);
+      try {
+        //get the code fro the each room
+        const code = codeService.getCode(roomCode);
+        const snapshot = codeService.getDocSnapshot(roomCode);
 
-      //add the code to the redis
-      await redisRoomService.updateCode(roomCode, code);
+        Promise.all([
+          redisRoomService.updateCode(roomCode, code),
+          redisRoomService.saveYDoc(roomCode, snapshot),
+        ]);
+        //add the code to the redis
 
-      codeService.delSavingRoom(roomCode);
+        codeService.delSavingRoom(roomCode);
+      } catch (err) {
+        logger.error(`error while saving code in redis , ${err}`);
+      }
     }
   }, time);

@@ -33,6 +33,10 @@ const createUpdate = (roomCode: string) => {
   return Y.encodeStateAsUpdate(doc);
 };
 
+const createUpdateWithDoc = (doc: Y.Doc, ydoc: Uint8Array) => {
+  return Y.applyUpdate(doc, ydoc);
+};
+
 const codeChangeService = (
   socket: Socket,
   code: Uint8Array,
@@ -53,18 +57,24 @@ const deleteDoc = (roomCode: string) => {
 };
 
 //fucntions for the saving room
-const getSavingRooms = () => toSavedBeRoom;
+const getSavingRooms = () => Array.from(toSavedBeRoom);
 
 const delSavingRoom = (roomCode: string) => {
   toSavedBeRoom.delete(roomCode);
 };
 
+const getDocSnapshot = (roomCode: string) => {
+  return Buffer.from(createUpdate(roomCode));
+};
+
 export const codeService = {
   getOrCreateCodeDoc,
   createUpdate,
+  createUpdateWithDoc,
   getCode,
   codeChangeService,
   deleteDoc,
   getSavingRooms,
   delSavingRoom,
+  getDocSnapshot,
 };

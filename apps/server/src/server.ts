@@ -6,6 +6,7 @@ import { initializeSocket } from "./socket/socket";
 import { initializeRedis } from "./config/redis";
 import { connectDatabase } from "./config/database";
 import { gracefulShutdown } from "./lib/shutdown";
+import { startWorkers } from "./infrastructure/worker";
 
 //creating a new http server with express
 const server = http.createServer(app);
@@ -18,6 +19,8 @@ async function startServer() {
     
     //add database connection
     await connectDatabase()
+
+    await startWorkers();
 
     //adding the socket connection
     const io = initializeSocket(server);

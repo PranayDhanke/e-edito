@@ -6,20 +6,9 @@ const getRoomKey = (roomCode: string) => `room:${roomCode}`;
 const getParticipantsKey = (roomCode: string) =>
   `room:${roomCode}:participants`;
 
-type RedisRoom = {
-  code: string;
-  language: string;
-  revision: number;
-  last_activity: number;
-};
-
 // Store room in Redis
-const addRoom = async (
-  roomCode: string,
-  code: string,
-  language: string,
-) => {
-  const room: RedisRoom = {
+const addRoom = async (roomCode: string, code: string, language: string) => {
+  const room = {
     code,
     language,
     revision: 0,
@@ -28,7 +17,13 @@ const addRoom = async (
 
   await redis.set(getRoomKey(roomCode), JSON.stringify(room));
 
+  await redis.sadd("rooms", roomCode);
+
   return room;
+};
+
+const delSroom = async (roomCode: string) => {
+  await redis.srem("rooms", roomCode);
 };
 
 // Get room from Redis or Mongo
@@ -36,7 +31,7 @@ const getOrCreateRoom = async (roomCode: string) => {
   const cachedRoom = await redis.get(getRoomKey(roomCode));
 
   if (cachedRoom) {
-    return JSON.parse(cachedRoom) as RedisRoom;
+    return JSON.parse(cachedRoom);
   }
 
   const room = (await roomService.getRoomService(roomCode)) as Room | null;
@@ -101,6 +96,20 @@ const getParticipants = async (roomCode: string) => {
   return redis.hgetall(getParticipantsKey(roomCode));
 };
 
+//save the ygoc
+const saveYDoc = async (roomCode: string, snapshot: Buffer) => {
+  const room = await getOrCreateRoom(roomCode);
+
+  if (!room) return null;
+
+  room.yDoc = snapshot;
+  room.last_activity = Date.now();
+
+  await redis.set(getRoomKey(roomCode), JSON.stringify(room));
+
+  return room;
+};
+
 export const redisRoomService = {
   addRoom,
   getOrCreateRoom,
@@ -111,4 +120,8 @@ export const redisRoomService = {
   addParticipant,
   removeParticipant,
   getParticipants,
+
+  saveYDoc,
+
+  delSroom,
 };

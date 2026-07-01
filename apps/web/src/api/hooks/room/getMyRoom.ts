@@ -2,29 +2,37 @@
 
 import { roomService } from "@/api/services/roomService";
 import { useAuth } from "@clerk/nextjs";
-import { useQuery } from "@tanstack/react-query";
+import { RoomFilters } from "@repo/shared-types";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 //creating a hook to get data from the query
-export const useGetMyRoom = () => {
+export const useGetMyRoom = (filters: Omit<RoomFilters, "cursor">) => {
   const { getToken } = useAuth();
 
-  return useQuery({
-    //this query ke ast as a cache key to get and save the data
-    queryKey: ["rooms"],
+  return useInfiniteQuery({
+    queryKey: [
+      "rooms",
+      filters.limit ?? 10,
+      filters.search ?? "",
+      filters.status ?? "all",
+      filters.language ?? "all",
+    ],
+    initialPageParam: undefined as string | undefined,
 
-    //queuery funcation here we implement fetch functions
-    queryFn: async () => {
-      //first take the token from clerk
+    queryFn: async ({ pageParam }) => {
       const token = await getToken();
 
       if (!token) {
         throw new Error("Failed to get the token");
       }
 
-      //calling the user service which has fetch function
-      const rooms = await roomService.getMyRoom(token);
+      const rooms = await roomService.getMyRoom(token, {
+        ...filters,
+        cursor: pageParam,
+      });
 
       return rooms.data;
     },
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
   });
 };

@@ -2,7 +2,8 @@
 
 import { logService } from "@/api/services/logsService";
 import { useAuth } from "@clerk/nextjs";
-import { useQuery } from "@tanstack/react-query";
+import { cursorFilters } from "@repo/shared-types";
+import { useInfiniteQuery } from "@tanstack/react-query";
 
 export interface RoomLogItem {
   _id: string;
@@ -22,21 +23,30 @@ export interface RoomLogResponse {
   };
 }
 
-export const useGetRoomLogs = (roomCode: string) => {
+export const useGetRoomLogs = (
+  roomCode: string,
+  filters: Omit<cursorFilters, "cursor">,
+) => {
   const { getToken } = useAuth();
 
-  return useQuery({
-    queryKey: ["room-logs", roomCode],
+  return useInfiniteQuery({
+    queryKey: ["room-logs", roomCode, filters.limit ?? 20],
     enabled: !!roomCode,
-    queryFn: async () => {
+    initialPageParam: undefined as string | undefined,
+    queryFn: async ({ pageParam }) => {
       const token = await getToken();
 
       if (!token) {
         throw new Error("Failed to get the token");
       }
 
-      const response = await logService.getLogs(token, roomCode);
+      const response = await logService.getLogs(token, roomCode, {
+        ...filters,
+        cursor: pageParam,
+      });
+
       return response.data as RoomLogResponse;
     },
+    getNextPageParam: (lastPage) => lastPage.nextCursor || undefined,
   });
 };

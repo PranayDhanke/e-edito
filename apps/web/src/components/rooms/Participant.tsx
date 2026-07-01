@@ -10,40 +10,66 @@ import { RoomParticipant } from "@repo/validation";
 import { Member, SocketEvent, User } from "@repo/shared-types";
 import { useCallback, useEffect, useState } from "react";
 import { useSocket } from "@/socket/socket-provider";
+import { useRouter } from "next/navigation";
 
 const Participant = ({
   roomCode,
   currentUserId,
   isOwner,
+  participants,
 }: {
   roomCode: string;
   currentUserId?: string;
   isOwner?: boolean;
+  participants: Member[];
 }) => {
   const socket = useSocket();
   const [data, setData] = useState<Member[]>([]);
   const { mutateAsync: removeParticipant } = useRemovePatticipant();
   const { mutateAsync: banParticipant } = useBanPatticipant();
+  const router = useRouter();
 
-  const handleRoomJoin = useCallback(async (participant: Member[]) => {
-    setData(participant);
-  }, []);
+  const handleUserJoin = useCallback(
+    (participant: Member) => {
+      setData((prev) => {
+        if (prev.some((member) => member._id === participant._id)) {
+          return prev;
+        }
 
-  const handleUserJoin = useCallback((participant: Member) => {
-    data.push(participant);
-  }, []);
+        return [...prev, participant];
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!participants) return;
+    setData(participants);
+  }, [participants]);
+
+  const handleUserLeft = useCallback(
+    (userId: string) => {
+      setData((prev) => prev.filter((member) => member._id !== userId));
+
+      if (currentUserId !== userId) return;
+
+      toast.error("You are kicked");
+      router.replace("/dashboard");
+    },
+    [currentUserId, router],
+  );
 
   useEffect(() => {
     if (!socket) return;
 
-    socket.on(SocketEvent.ROOM_JOINED, handleRoomJoin);
     socket.on(SocketEvent.USER_JOINED, handleUserJoin);
+    socket.on(SocketEvent.USER_LEFT_RES, handleUserLeft);
 
     return () => {
-      socket.off(SocketEvent.ROOM_JOINED, handleRoomJoin);
       socket.off(SocketEvent.USER_JOINED, handleUserJoin);
+      socket.off(SocketEvent.USER_LEFT_RES, handleUserLeft);
     };
-  }, []);
+  }, [socket, handleUserJoin, handleUserLeft]);
 
   const handleRemove = async (userId: string) => {
     try {
@@ -51,6 +77,9 @@ const Participant = ({
         roomCode,
         userId,
       });
+
+      setData((prev) => prev.filter((m) => m._id !== userId));
+      socket?.emit(SocketEvent.USER_LEFT, userId);
 
       toast.success("Participant removed");
     } catch (error) {
@@ -73,6 +102,9 @@ const Participant = ({
           reason,
         },
       });
+
+      setData((prev) => prev.filter((m) => m._id !== userId));
+      socket?.emit(SocketEvent.USER_LEFT, userId);
 
       toast.success("Participant banned");
     } catch (error) {
