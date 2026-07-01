@@ -43,7 +43,7 @@ export default function RootLayout({
       <html
         lang="en"
         className={cn(
-          "h-full",
+          "h-screen",
           "antialiased",
           geistSans.variable,
           geistMono.variable,
@@ -52,10 +52,12 @@ export default function RootLayout({
           playfairDisplayHeading.variable,
         )}
       >
-        <body className="min-h-full flex flex-col">
+        <body className="h-screen flex flex-col overflow-hidden">
           <Navbar />
 
-          {children}
+          <div className="flex-1 overflow-hidden">
+            {children}
+          </div>
           <Toaster />
         </body>
       </html>
