@@ -89,49 +89,44 @@ const DashboardPage = () => {
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <section className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.18),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.98))] p-6 shadow-[0_32px_120px_-48px_rgba(15,23,42,0.45)] md:p-8">
-        <div className="absolute inset-x-0 top-0 h-36 bg-[linear-gradient(90deg,rgba(249,115,22,0.08),rgba(14,165,233,0.07),rgba(16,185,129,0.07))]" />
-
+      <section className="relative overflow-hidden rounded-lg border border-border/40 bg-gradient-to-br from-background/80 via-background to-background/95 p-6 shadow-sm md:p-8">
         <div className="relative">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50/85 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-amber-900">
-              <Sparkles className="size-3.5" />
-              Workspace control center
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
+              <Sparkles className="size-3" />
+              Rooms
             </div>
-            <h1 className="mt-5 font-heading text-4xl font-semibold text-foreground md:text-5xl">
-              Build rooms that are ready for real collaboration.
+            <h1 className="mt-4 font-heading text-3xl font-semibold text-foreground md:text-4xl">
+              Collaborative Code Spaces
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-muted-foreground md:text-base">
-              Launch a focused coding room, invite people with the right access,
-              and jump back into active sessions without hunting for links.
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground md:text-base">
+              Create focused rooms for pair programming, interviews, and code reviews. Invite collaborators and code together in real-time.
             </p>
           </div>
 
-          <div className="mt-6 grid gap-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <Button size="lg" className="w-full sm:w-auto" asChild>
-                <Link href="/dashboard/create-room">
-                  <Plus className="size-4" />
-                  Create a room
-                </Link>
-              </Button>
-              <div className="grid grid-cols-2 gap-3 sm:w-auto">
-                <div className="rounded-2xl border border-border/60 bg-background/75 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    Total
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-foreground">
-                    {rooms.length}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-border/60 bg-background/75 p-4">
-                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    Live
-                  </p>
-                  <p className="mt-2 text-2xl font-semibold text-foreground">
-                    {rooms.filter((room) => room.status === "active").length}
-                  </p>
-                </div>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button size="lg" className="w-full sm:w-auto" asChild>
+              <Link href="/dashboard/create-room">
+                <Plus className="size-4" />
+                Create Room
+              </Link>
+            </Button>
+            <div className="grid grid-cols-2 gap-3 sm:w-auto">
+              <div className="rounded-lg border border-border/40 bg-background/60 p-3">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Total Rooms
+                </p>
+                <p className="mt-1.5 text-xl font-semibold text-foreground">
+                  {rooms.length}
+                </p>
+              </div>
+              <div className="rounded-lg border border-border/40 bg-background/60 p-3">
+                <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Active
+                </p>
+                <p className="mt-1.5 text-xl font-semibold text-foreground">
+                  {rooms.filter((room) => room.status === "active").length}
+                </p>
               </div>
             </div>
           </div>
@@ -140,37 +135,35 @@ const DashboardPage = () => {
 
       <section className="mt-8">
         <div className="mb-6">
-          <div className="flex items-center justify-between gap-4 mb-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                Your rooms
-              </p>
-              <h2 className="mt-2 font-heading text-3xl font-semibold text-foreground">
-                Pick up where you left off
-              </h2>
-            </div>
+          <div className="mb-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Your Rooms
+            </p>
+            <h2 className="mt-2 font-heading text-2xl font-semibold text-foreground">
+              Pick up where you left off
+            </h2>
           </div>
 
-          <div className="rounded-[2rem] border border-border/60 bg-card/85 p-4 backdrop-blur">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+          <div className="rounded-lg border border-border/40 bg-background/60 p-4">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Search
                 </label>
                 <Input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by room name"
-                  className="w-full"
+                  placeholder="Room name"
+                  className="w-full text-sm"
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Status
                 </label>
                 <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full text-sm">
                     <SelectValue placeholder="All statuses" />
                   </SelectTrigger>
                   <SelectContent>
@@ -182,12 +175,12 @@ const DashboardPage = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Language
                 </label>
                 <Select value={language} onValueChange={setLanguage}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full text-sm">
                     <SelectValue placeholder="All languages" />
                   </SelectTrigger>
                   <SelectContent>
@@ -201,12 +194,12 @@ const DashboardPage = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                  Page size
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Per Page
                 </label>
                 <Select value={limit} onValueChange={setLimit}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full text-sm">
                     <SelectValue placeholder="Select limit" />
                   </SelectTrigger>
                   <SelectContent>
@@ -220,9 +213,9 @@ const DashboardPage = () => {
               <Button
                 variant="outline"
                 onClick={handleResetFilters}
-                className="w-full"
+                className="w-full text-sm"
               >
-                <Filter className="size-4" />
+                <Filter className="size-3.5" />
                 Reset
               </Button>
             </div>
@@ -230,123 +223,110 @@ const DashboardPage = () => {
         </div>
 
         {rooms.length === 0 ? (
-          <div className="rounded-[2rem] border border-dashed border-border/80 bg-card/60 p-10 text-center shadow-sm">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-[linear-gradient(135deg,rgba(249,115,22,0.12),rgba(14,165,233,0.12))]">
-              <Code2 className="size-6 text-foreground" />
+          <div className="rounded-lg border border-dashed border-border/60 bg-background/40 p-8 text-center shadow-sm">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-primary/10">
+              <Code2 className="size-5 text-primary" />
             </div>
-            <h3 className="mt-5 font-heading text-2xl font-semibold">
+            <h3 className="mt-4 font-semibold text-foreground">
               No rooms yet
             </h3>
-            <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-muted-foreground">
-              Start with one polished workspace for your next pair-programming
-              session, interview, or review.
+            <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
+              Create your first collaborative coding room to get started
             </p>
-            <Button className="mt-6" size="lg" asChild>
+            <Button className="mt-4" size="sm" asChild>
               <Link href="/dashboard/create-room">
-                Create your first room
-                <ArrowRight className="size-4" />
+                <Plus className="size-4" />
+                Create First Room
               </Link>
             </Button>
           </div>
         ) : (
-          <div className="grid gap-5 xl:grid-cols-2">
-            {rooms.map((room, index) => (
+          <div className="grid gap-4 md:grid-cols-2">
+            {rooms.map((room) => (
               <article
                 key={room._id}
-                className={cn(
-                  "rounded-[2rem] border border-white/60 bg-gradient-to-br p-6 shadow-[0_24px_80px_-44px_rgba(15,23,42,0.42)]",
-                  dashboardCardStyles[index % dashboardCardStyles.length],
-                )}
+                className="rounded-lg border border-border/40 bg-card p-5 shadow-sm hover:shadow-md transition-shadow"
               >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="max-w-xl">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={cn(
-                          "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]",
-                          roomStatusTone[room.status] ||
-                            "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
-                        )}
-                      >
-                        {room.status}
-                      </span>
-                      <span className="rounded-full border border-black/10 bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700">
-                        {room.language}
-                      </span>
+                <div className="flex flex-col gap-4">
+                  {/* Header with badges */}
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span
+                          className={cn(
+                            "rounded-md px-2.5 py-1 text-xs font-semibold",
+                            roomStatusTone[room.status] ||
+                              "bg-muted text-muted-foreground",
+                          )}
+                        >
+                          {room.status}
+                        </span>
+                        <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-primary/10 text-primary">
+                          {room.language}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-foreground truncate">
+                        {room.name}
+                      </h3>
+                      <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                        {room.description || "No description"}
+                      </p>
                     </div>
-                    <h3 className="mt-4 font-heading text-2xl font-semibold text-slate-950">
-                      {room.name}
-                    </h3>
-                    <p className="mt-3 text-sm leading-7 text-slate-700/80">
-                      {room.description || "No description provided yet."}
-                    </p>
+
+                    {/* Room code box */}
+                    <div className="rounded-md border border-border/40 bg-background/60 px-3 py-2 text-xs flex-shrink-0">
+                      <p className="text-muted-foreground font-medium">Code</p>
+                      <p className="font-mono text-sm font-semibold mt-0.5">
+                        {room.room_code}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="rounded-2xl border border-black/10 bg-white/70 px-4 py-3 text-sm text-slate-800">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                      Room code
-                    </p>
-                    <p className="mt-2 font-mono text-lg font-semibold tracking-[0.18em]">
-                      {room.room_code}
-                    </p>
+                  {/* Stats grid */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-md border border-border/30 bg-background/40 p-2">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Users className="size-3" />
+                        <span className="text-xs">Seats</span>
+                      </div>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {room.participantCount}/{room.maxParticipants}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-border/30 bg-background/40 p-2">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Lock className="size-3" />
+                        <span className="text-xs">Access</span>
+                      </div>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {room.is_public ? "Public" : "Private"}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-border/30 bg-background/40 p-2">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Mic className="size-3" />
+                        <span className="text-xs">Audio</span>
+                      </div>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {room.is_audio_enabled ? "On" : "Off"}
+                      </p>
+                    </div>
+                    <div className="rounded-md border border-border/30 bg-background/40 p-2">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Video className="size-3" />
+                        <span className="text-xs">Video</span>
+                      </div>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {room.is_video_enabled ? "On" : "Off"}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-2xl border border-black/10 bg-white/65 p-4">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <Users className="size-4" />
-                      <span className="text-xs uppercase tracking-[0.18em]">
-                        Seats
-                      </span>
-                    </div>
-                    <p className="mt-2 text-lg font-semibold text-slate-950">
-                      {room.participantCount}/{room.maxParticipants}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-black/10 bg-white/65 p-4">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <Lock className="size-4" />
-                      <span className="text-xs uppercase tracking-[0.18em]">
-                        Access
-                      </span>
-                    </div>
-                    <p className="mt-2 text-lg font-semibold text-slate-950">
-                      {room.is_public ? "Public" : "Private"}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-black/10 bg-white/65 p-4">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <Mic className="size-4" />
-                      <span className="text-xs uppercase tracking-[0.18em]">
-                        Audio
-                      </span>
-                    </div>
-                    <p className="mt-2 text-lg font-semibold text-slate-950">
-                      {room.is_audio_enabled ? "On" : "Off"}
-                    </p>
-                  </div>
-                  <div className="rounded-2xl border border-black/10 bg-white/65 p-4">
-                    <div className="flex items-center gap-2 text-slate-600">
-                      <Video className="size-4" />
-                      <span className="text-xs uppercase tracking-[0.18em]">
-                        Video
-                      </span>
-                    </div>
-                    <p className="mt-2 text-lg font-semibold text-slate-950">
-                      {room.is_video_enabled ? "On" : "Off"}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-                    Ready for the next session
-                  </p>
-                  <Button asChild>
+                  {/* Action button */}
+                  <Button asChild size="sm" className="w-full">
                     <Link href={`/dashboard/workspace/${room.room_code}?role=owner`}>
-                      Open room
-                      <ArrowRight className="size-4" />
+                      <ArrowRight className="size-3.5" />
+                      Open Room
                     </Link>
                   </Button>
                 </div>
