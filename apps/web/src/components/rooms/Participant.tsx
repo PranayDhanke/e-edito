@@ -117,64 +117,70 @@ const Participant = ({
   return (
     <div className="space-y-2">
         {data?.map((participant: Member) => {
+          const isCurrentUser = currentUserId === participant._id;
           return (
             <div
               key={participant._id}
-              className="flex items-center gap-2 rounded-lg border border-border/40 bg-background/60 p-2.5 group hover:bg-background/80 transition-colors"
+              className={cn(
+                "flex items-center gap-2.5 rounded-md border p-3 group transition-all",
+                isCurrentUser ? "border-primary/40 bg-primary/5" : "border-border/30 bg-background/60 hover:bg-background/80"
+              )}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={participant.profile_image}
                 alt={participant.name}
-                width={40}
-                height={40}
-                className="h-10 w-10 rounded-lg object-cover ring-1 ring-border/40 flex-shrink-0"
+                width={36}
+                height={36}
+                className="h-9 w-9 rounded-md object-cover ring-1 ring-border/40 flex-shrink-0"
               />
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-semibold text-foreground">
-                  {participant.name}
-                </p>
+                <div className="flex items-center gap-2">
+                  <p className="truncate text-xs font-medium text-foreground">
+                    {participant.name}
+                  </p>
+                  {isCurrentUser && (
+                    <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                      You
+                    </span>
+                  )}
+                </div>
                 <span
                   className={cn(
-                    "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] inline-block mt-0.5",
-                    participant.role === "owner" &&
-                      "bg-amber-100/80 text-amber-700",
-                    participant.role === "editor" &&
-                      "bg-sky-100/80 text-sky-700",
-                    participant.role === "viewer" &&
-                      "bg-slate-100/80 text-slate-700",
+                    "rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider inline-block mt-1",
+                    participant.role === "owner" && "bg-amber-500/15 text-amber-600",
+                    participant.role === "editor" && "bg-blue-500/15 text-blue-600",
+                    participant.role === "viewer" && "bg-slate-500/15 text-slate-600",
                   )}
                 >
                   {participant.role}
                 </span>
               </div>
 
-              {isOwner &&
-                currentUserId !== participant._id &&
-                participant.role !== "owner" && (
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-                    <Button
-                      size="xs"
-                      variant="ghost"
-                      onClick={() => handleRemove(participant._id)}
-                      className="h-7 px-2"
-                    >
-                      Remove
-                    </Button>
+              {isOwner && !isCurrentUser && participant.role !== "owner" && (
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRemove(participant._id)}
+                    className="h-6 px-2 text-xs"
+                  >
+                    Remove
+                  </Button>
 
-                    <Button
-                      size="xs"
-                      variant="destructive"
-                      onClick={() =>
-                        handleBan(participant._id, participant.name)
-                      }
-                      className="h-7 px-2"
-                    >
-                      Ban
-                    </Button>
-                  </div>
-                )}
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() =>
+                      handleBan(participant._id, participant.name)
+                    }
+                    className="h-6 px-2 text-xs text-destructive hover:text-destructive"
+                  >
+                    Ban
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })}
