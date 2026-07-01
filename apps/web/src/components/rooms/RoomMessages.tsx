@@ -91,49 +91,53 @@ export const RoomMessages = ({
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="flex-1 space-y-3 overflow-y-auto mb-4 pr-2">
+    <div className="flex flex-col h-full bg-background/30">
+      {/* Messages Container */}
+      <div className="flex-1 overflow-y-auto p-3 space-y-2 min-h-0">
         {messages.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-center text-sm text-muted-foreground">
-            <p>No messages yet. Start the conversation!</p>
+          <div className="flex items-center justify-center h-full text-center">
+            <p className="text-xs text-muted-foreground">No messages yet. Start the conversation!</p>
           </div>
         ) : (
-          messages.map((message) => (
-            <div
-              key={message._id}
-              className="flex gap-3 rounded-lg bg-background/50 p-3 text-sm"
-            >
-              <img
-                src={message.userImage}
-                alt={message.userName}
-                className="h-8 w-8 rounded-full object-cover flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <span className="font-semibold text-xs text-foreground truncate">
-                    {message.userName}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(message.timestamp).toLocaleTimeString()}
-                  </span>
+          <>
+            {messages.map((message) => (
+              <div
+                key={message._id}
+                className="flex gap-2 rounded-lg bg-background/60 p-2 text-xs hover:bg-background/80 transition-colors"
+              >
+                <img
+                  src={message.userImage}
+                  alt={message.userName}
+                  className="h-7 w-7 rounded-full object-cover flex-shrink-0"
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-semibold text-foreground truncate">
+                      {message.userName}
+                    </span>
+                    <span className="text-xs text-muted-foreground flex-shrink-0">
+                      {new Date(message.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <p className="text-foreground break-words leading-snug mt-0.5">
+                    {message.content}
+                  </p>
                 </div>
-                <p className="text-foreground break-words text-xs leading-5 mt-1">
-                  {message.content}
-                </p>
               </div>
-            </div>
-          ))
+            ))}
+            <div ref={messagesEndRef} />
+          </>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSendMessage} className="flex gap-2">
+      {/* Input Form */}
+      <form onSubmit={handleSendMessage} className="flex gap-2 p-3 border-t border-border/40 bg-background/50 flex-shrink-0">
         <Input
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="Type a message..."
+          placeholder="Message..."
           disabled={isSending}
-          className="text-sm"
+          className="text-xs h-8 rounded-lg"
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
               e.preventDefault();
@@ -145,8 +149,9 @@ export const RoomMessages = ({
           size="sm"
           type="submit"
           disabled={isSending || !inputValue.trim()}
+          className="h-8 px-2"
         >
-          <Send className="size-4" />
+          <Send className="size-3" />
         </Button>
       </form>
     </div>

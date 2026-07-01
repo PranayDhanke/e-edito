@@ -167,7 +167,7 @@ const RoomWorkspace = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="fixed inset-0 flex flex-col bg-background">
       <RoomToolsPanel
         key={`${room_code}-${toolsDefaultTab}-${isToolsPanelOpen ? "open" : "closed"}`}
         open={isToolsPanelOpen}
@@ -180,124 +180,123 @@ const RoomWorkspace = () => {
         isOwner={data?.owner_id === user?.id}
       />
 
-      <div className="mb-6 flex flex-col gap-4 sm:gap-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Active workspace
-            </p>
-            <h1 className="mt-2 font-heading text-3xl font-semibold text-foreground">
-              {data?.name || "Room workspace"}
-            </h1>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {data?.description || "A shared coding room ready for edits, saved versions, and team activity."}
-            </p>
+      {/* Header */}
+      <header className="border-b border-border/60 bg-background/95 backdrop-blur-sm px-4 py-3 sm:px-6 flex-shrink-0">
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex-1">
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Active workspace
+              </p>
+              <h1 className="mt-1 font-heading text-2xl font-semibold text-foreground">
+                {data?.name || "Room workspace"}
+              </h1>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await navigator.clipboard.writeText(room_code);
+                  toast.success("Room code copied");
+                }}
+              >
+                <Copy className="size-3.5" />
+                {room_code}
+              </Button>
+              <InviteButton
+                onClick={() => {
+                  setToolsDefaultTab(data?.owner_id === user?.id ? "invite" : "logs");
+                  setIsToolsPanelOpen(true);
+                }}
+              />
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={isLeaving}
+                onClick={handleLeaveRoom}
+              >
+                <LogOut className="size-3.5" />
+                {isLeaving ? "Leaving..." : "Leave"}
+              </Button>
+            </div>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                await navigator.clipboard.writeText(room_code);
-                toast.success("Room code copied");
-              }}
-            >
-              <Copy className="size-3.5" />
-              {room_code}
-            </Button>
-            <InviteButton
-              onClick={() => {
-                setToolsDefaultTab(data?.owner_id === user?.id ? "invite" : "logs");
-                setIsToolsPanelOpen(true);
-              }}
-            />
-            <Button
-              size="sm"
-              variant="destructive"
-              disabled={isLeaving}
-              onClick={handleLeaveRoom}
-            >
-              <LogOut className="size-3.5" />
-              {isLeaving ? "Leaving..." : "Leave"}
-            </Button>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-[radial-gradient(circle_at_top_left,_rgba(255,222,156,0.35),_transparent_30%),linear-gradient(180deg,_rgba(255,255,255,0.96),_rgba(248,250,252,0.98))] p-4 shadow-[0_32px_120px_-48px_rgba(15,23,42,0.45)] md:p-6">
-        <div className="absolute inset-x-0 top-0 h-40 bg-[linear-gradient(90deg,rgba(249,115,22,0.08),rgba(14,165,233,0.06),rgba(16,185,129,0.06))]" />
-
-        <div className="relative space-y-6">
-          <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
             {stats.map((stat, index) => (
               <div
                 key={stat.label}
                 className={cn(
-                  "rounded-[1.75rem] border border-white/50 bg-gradient-to-br p-4 shadow-[0_18px_50px_-32px_rgba(15,23,42,0.4)]",
+                  "rounded-lg border border-white/50 bg-gradient-to-br p-3 shadow-sm text-xs",
                   statCardStyles[index % statCardStyles.length],
                 )}
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] opacity-70">
+                <p className="font-semibold uppercase tracking-[0.2em] opacity-70">
                   {stat.label}
                 </p>
-                <p className="mt-2 text-xl font-semibold">{stat.value}</p>
-                <p className="mt-1 text-xs opacity-75">{stat.helper}</p>
+                <p className="mt-1 text-lg font-semibold">{stat.value}</p>
               </div>
             ))}
-          </section>
-
-          <section className="grid gap-6 lg:grid-cols-[1fr_380px] min-h-[600px]">
-            <div className="space-y-4">
-              <div className="rounded-[2rem] border border-border/60 bg-card/85 p-4 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.4)] backdrop-blur h-full flex flex-col">
-                <div className="mb-4 flex items-center justify-between gap-4 px-2">
-                  <div>
-                    <h2 className="font-heading text-lg font-semibold">
-                      Live editor
-                    </h2>
-                    <p className="text-xs text-muted-foreground">
-                      {data?.language} • Real-time collaboration
-                    </p>
-                  </div>
-                  <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted-foreground">
-                    {data?.language}
-                  </span>
-                </div>
-                <div className="flex-1 overflow-hidden rounded-[1.5rem] border border-slate-800/70 min-h-0">
-                  {!initialCode ? (
-                    <div className="flex items-center justify-center h-full text-muted-foreground">
-                      Loading editor...
-                    </div>
-                  ) : (
-                    <MonacoEditor initialCode={initialCode} />
-                  )}
-                </div>
-              </div>
-
-              <div className="rounded-[2rem] border border-border/60 bg-card/85 p-4 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.4)] backdrop-blur">
-                <div className="mb-4 px-2">
-                  <h2 className="font-heading text-lg font-semibold">
-                    Version history
-                  </h2>
-                  <p className="text-xs text-muted-foreground">
-                    Recent saved states
-                  </p>
-                </div>
-                <RoomVersions roomCode={room_code} />
-              </div>
-            </div>
-
-            <aside className="min-h-0">
-              <WorkspacePanel
-                roomCode={room_code}
-                currentUserId={user?.id}
-                isOwner={data?.owner_id === user?.id}
-                participants={participants}
-                isAudioEnabled={data?.is_audio_enabled}
-                isVideoEnabled={data?.is_video_enabled}
-              />
-            </aside>
-          </section>
+          </div>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-hidden flex gap-4 p-4 sm:p-6">
+        {/* Editor Section */}
+        <div className="flex-1 flex flex-col gap-4 min-w-0">
+          {/* Code Editor */}
+          <div className="flex-1 rounded-xl border border-border/60 bg-card/85 shadow-lg overflow-hidden flex flex-col backdrop-blur min-h-0">
+            <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border/60 bg-background/40 flex-shrink-0">
+              <div>
+                <h2 className="font-heading text-base font-semibold">
+                  Live editor
+                </h2>
+                <p className="text-xs text-muted-foreground">
+                  {data?.language} • Real-time collaboration
+                </p>
+              </div>
+              <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted-foreground flex-shrink-0">
+                {data?.language}
+              </span>
+            </div>
+            <div className="flex-1 overflow-hidden min-h-0 bg-slate-950">
+              {!initialCode ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Loading editor...
+                </div>
+              ) : (
+                <MonacoEditor initialCode={initialCode} />
+              )}
+            </div>
+          </div>
+
+          {/* Version History */}
+          <div className="h-40 rounded-xl border border-border/60 bg-card/85 shadow-lg overflow-hidden flex flex-col backdrop-blur flex-shrink-0">
+            <div className="px-4 py-3 border-b border-border/60 bg-background/40 flex-shrink-0">
+              <h2 className="font-heading text-base font-semibold">
+                Version history
+              </h2>
+              <p className="text-xs text-muted-foreground">
+                Recent saved states
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <RoomVersions roomCode={room_code} />
+            </div>
+          </div>
+        </div>
+
+        {/* Right Panel */}
+        <aside className="w-96 max-w-full flex-shrink-0 min-w-0">
+          <WorkspacePanel
+            roomCode={room_code}
+            currentUserId={user?.id}
+            isOwner={data?.owner_id === user?.id}
+            participants={participants}
+            isAudioEnabled={data?.is_audio_enabled}
+            isVideoEnabled={data?.is_video_enabled}
+          />
+        </aside>
       </div>
     </div>
   );

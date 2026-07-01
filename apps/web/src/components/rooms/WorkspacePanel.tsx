@@ -36,54 +36,79 @@ export const WorkspacePanel = ({
   ];
 
   return (
-    <div className="rounded-[2rem] border border-border/60 bg-card/85 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.4)] backdrop-blur overflow-hidden flex flex-col h-full max-h-[calc(100vh-200px)]">
-      <div className="border-b border-border/60 p-3 shrink-0">
-        <div className="flex gap-1.5 overflow-x-auto pb-1">
+    <div className="rounded-xl border border-border/60 bg-card/85 shadow-lg backdrop-blur overflow-hidden flex flex-col h-full">
+      {/* Tab Header */}
+      <div className="border-b border-border/60 p-3 bg-background/40 flex-shrink-0">
+        <div className="flex gap-1 overflow-x-auto pb-0.5 scroll-smooth">
           {tabs.map((tab) => (
             <Button
               key={tab.id}
-              variant={activeTab === tab.id ? "default" : "outline"}
+              variant={activeTab === tab.id ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveTab(tab.id)}
-              className="flex items-center gap-1.5 whitespace-nowrap text-xs"
+              className="flex items-center gap-2 whitespace-nowrap text-xs rounded-lg"
             >
               {tab.icon}
-              {tab.label}
+              <span className="hidden sm:inline">{tab.label}</span>
             </Button>
           ))}
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col min-h-0 p-3">
+      {/* Content Area */}
+      <div className="flex-1 overflow-hidden flex flex-col min-h-0">
         {activeTab === "participants" && (
-          <div className="space-y-2 overflow-y-auto flex-1">
-            <Participant
-              roomCode={roomCode}
-              currentUserId={currentUserId}
-              isOwner={isOwner}
-              participants={participants}
-            />
+          <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
+            <div className="px-3 py-2 border-b border-border/40 flex-shrink-0 bg-background/20">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Active members
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              <Participant
+                roomCode={roomCode}
+                currentUserId={currentUserId}
+                isOwner={isOwner}
+                participants={participants}
+              />
+            </div>
           </div>
         )}
 
         {activeTab === "messages" && (
-          <RoomMessages roomCode={roomCode} currentUserId={currentUserId} />
+          <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
+            <div className="px-3 py-2 border-b border-border/40 flex-shrink-0 bg-background/20">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Messages
+              </p>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <RoomMessages roomCode={roomCode} currentUserId={currentUserId} />
+            </div>
+          </div>
         )}
 
         {activeTab === "video" && (
-          <div className="overflow-y-auto flex-1">
-            {isAudioEnabled || isVideoEnabled ? (
-              <RoomCall
-                currentUserId={currentUserId}
-                isAudioEnabled={isAudioEnabled}
-                isVideoEnabled={isVideoEnabled}
-                participants={participants}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-center">
-                <p className="text-xs text-muted-foreground">Audio and video are disabled for this room.</p>
-              </div>
-            )}
+          <div className="flex flex-col min-h-0 flex-1 overflow-hidden">
+            <div className="px-3 py-2 border-b border-border/40 flex-shrink-0 bg-background/20">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Video tiles
+              </p>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              {isAudioEnabled || isVideoEnabled ? (
+                <RoomCall
+                  currentUserId={currentUserId}
+                  isAudioEnabled={isAudioEnabled}
+                  isVideoEnabled={isVideoEnabled}
+                  participants={participants}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-center">
+                  <p className="text-xs text-muted-foreground">Audio and video are disabled for this room.</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
