@@ -170,34 +170,18 @@ export const RoomToolsPanel = ({
         ) : null}
 
         {activeTab === "logs" ? (
-          <section className="rounded-[2rem] border border-border/60 bg-card/85 p-6 shadow-sm">
-            <div className="flex flex-col gap-4 border-b border-border/60 pb-5 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <h3 className="font-heading text-2xl font-semibold">Room activity</h3>
-                <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                  Review recent events, moderation actions, and collaboration changes.
-                </p>
-              </div>
+          <section className="space-y-6">
+            <div>
+              <h3 className="font-heading text-xl font-semibold">Room activity</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Review recent events, moderation actions, and collaboration changes.
+              </p>
+            </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="min-w-[140px]">
-                  <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                    Page size
-                  </label>
-                  <Select value={limit} onValueChange={setLimit}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select limit" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10</SelectItem>
-                      <SelectItem value="20">20</SelectItem>
-                      <SelectItem value="30">30</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="min-w-[180px]">
-                  <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+            <div className="rounded-[1.5rem] border border-border/60 bg-background/80 p-4 space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground block mb-2">
                     Event type
                   </label>
                   <Select value={actionFilter} onValueChange={setActionFilter}>
@@ -215,12 +199,28 @@ export const RoomToolsPanel = ({
                     </SelectContent>
                   </Select>
                 </div>
+
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground block mb-2">
+                    Page size
+                  </label>
+                  <Select value={limit} onValueChange={setLimit}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select limit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="10">10 items</SelectItem>
+                      <SelectItem value="20">20 items</SelectItem>
+                      <SelectItem value="30">30 items</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="space-y-3 max-h-[500px] overflow-y-auto">
               {isLoading ? (
-                <div className="rounded-2xl border border-border/60 bg-background/80 px-4 py-6 text-sm text-muted-foreground">
+                <div className="rounded-2xl border border-border/60 bg-background/60 px-4 py-8 text-center text-sm text-muted-foreground">
                   Loading activity...
                 </div>
               ) : null}
@@ -240,26 +240,18 @@ export const RoomToolsPanel = ({
               {visibleLogs.map((log) => (
                 <div
                   key={log._id}
-                  className="rounded-[1.5rem] border border-border/60 bg-background/85 p-4"
+                  className="rounded-xl border border-border/40 bg-background/60 p-3 text-sm"
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-foreground text-xs">
                         {actionLabelMap[log.action] || log.action}
                       </p>
-                      <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        <span
-                          className={cn(
-                            "rounded-full border border-border/70 px-2.5 py-1 uppercase tracking-[0.18em]",
-                          )}
-                        >
-                          {log.action}
-                        </span>
-                        <span>User: {log.user_id}</span>
-                      </div>
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        User: {log.user_id}
+                      </p>
                     </div>
-
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-xs text-muted-foreground flex-shrink-0">
                       {formatDate(log.created_at)}
                     </span>
                   </div>
@@ -268,14 +260,14 @@ export const RoomToolsPanel = ({
             </div>
 
             {hasNextPage ? (
-              <div className="mt-6 flex justify-center">
+              <div className="flex justify-center pt-4 border-t border-border/60">
                 <Button
                   variant="outline"
+                  size="sm"
                   disabled={isFetchingNextPage}
                   onClick={() => fetchNextPage()}
                 >
-                  <ListFilter className="size-4" />
-                  {isFetchingNextPage ? "Loading more..." : "Load more activity"}
+                  {isFetchingNextPage ? "Loading..." : "Load more activity"}
                 </Button>
               </div>
             ) : null}

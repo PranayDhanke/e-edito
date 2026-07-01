@@ -115,64 +115,50 @@ const Participant = ({
   };
 
   return (
-    <section className="rounded-[2rem] border border-border/60 bg-card/85 p-5 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.4)] backdrop-blur">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="font-heading text-xl font-semibold">Participants</h2>
-          <p className="text-sm text-muted-foreground">
-            Everyone in this room.
-          </p>
-        </div>
-
-        <span className="rounded-full border border-border/70 px-3 py-1 text-xs font-medium text-muted-foreground">
-          {data?.length ?? 0} members
-        </span>
-      </div>
-
-      <div className="space-y-3">
+    <div className="space-y-2">
         {data?.map((participant: Member) => {
           return (
             <div
               key={participant._id}
-              className="flex items-center gap-3 rounded-2xl border border-border/60 bg-background/80 p-3"
+              className="flex items-center gap-2 rounded-lg border border-border/40 bg-background/60 p-2.5 group hover:bg-background/80 transition-colors"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={participant.profile_image}
                 alt={participant.name}
-                width={44}
-                height={44}
-                className="h-11 w-11 rounded-2xl object-cover ring-1 ring-border/60"
+                width={40}
+                height={40}
+                className="h-10 w-10 rounded-lg object-cover ring-1 ring-border/40 flex-shrink-0"
               />
 
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-foreground">
+                <p className="truncate text-xs font-semibold text-foreground">
                   {participant.name}
                 </p>
+                <span
+                  className={cn(
+                    "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] inline-block mt-0.5",
+                    participant.role === "owner" &&
+                      "bg-amber-100/80 text-amber-700",
+                    participant.role === "editor" &&
+                      "bg-sky-100/80 text-sky-700",
+                    participant.role === "viewer" &&
+                      "bg-slate-100/80 text-slate-700",
+                  )}
+                >
+                  {participant.role}
+                </span>
               </div>
-
-              <span
-                className={cn(
-                  "rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]",
-                  participant.role === "owner" &&
-                    "bg-amber-100 text-amber-800 ring-1 ring-amber-200",
-                  participant.role === "editor" &&
-                    "bg-sky-100 text-sky-800 ring-1 ring-sky-200",
-                  participant.role === "viewer" &&
-                    "bg-slate-100 text-slate-700 ring-1 ring-slate-200",
-                )}
-              >
-                {participant.role}
-              </span>
 
               {isOwner &&
                 currentUserId !== participant._id &&
                 participant.role !== "owner" && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                     <Button
                       size="xs"
-                      variant="outline"
+                      variant="ghost"
                       onClick={() => handleRemove(participant._id)}
+                      className="h-7 px-2"
                     >
                       Remove
                     </Button>
@@ -183,6 +169,7 @@ const Participant = ({
                       onClick={() =>
                         handleBan(participant._id, participant.name)
                       }
+                      className="h-7 px-2"
                     >
                       Ban
                     </Button>
@@ -191,8 +178,7 @@ const Participant = ({
             </div>
           );
         })}
-      </div>
-    </section>
+    </div>
   );
 };
 

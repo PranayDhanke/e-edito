@@ -33,15 +33,7 @@ const RoomVersions = ({ roomCode }: { roomCode: string }) => {
   }
 
   return (
-    <section className="rounded-[2rem] border border-border/60 bg-card/85 p-5 shadow-[0_24px_70px_-36px_rgba(15,23,42,0.4)] backdrop-blur">
-      <div className="mb-4">
-        <h2 className="font-heading text-xl font-semibold">Version history</h2>
-        <p className="text-sm text-muted-foreground">
-          Recent saved states for this room.
-        </p>
-      </div>
-
-      <div className="space-y-3">
+    <div className="space-y-3">
         {data?.versions?.map((version) => (
           <article
             key={version._id}
@@ -74,8 +66,7 @@ const RoomVersions = ({ roomCode }: { roomCode: string }) => {
             No saved versions yet.
           </div>
         )}
-      </div>
-    </section>
+    </div>
   );
 };
 

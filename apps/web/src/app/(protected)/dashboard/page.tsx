@@ -41,7 +41,6 @@ const roomStatusTone: Record<string, string> = {
 };
 
 const DashboardPage = () => {
-  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("all");
   const [language, setLanguage] = useState("all");
@@ -81,104 +80,19 @@ const DashboardPage = () => {
     );
   }
 
+  const handleResetFilters = () => {
+    setSearch("");
+    setStatus("all");
+    setLanguage("all");
+    setLimit("10");
+  };
+
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <SlideOver
-        open={isFilterPanelOpen}
-        onClose={() => setIsFilterPanelOpen(false)}
-        title="Filter rooms"
-        description="Use the shared room filters to narrow the list and keep paging through results with cursor-based loading."
-      >
-        <div className="space-y-6">
-          <div className="space-y-3">
-            <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Search
-            </label>
-            <div className="rounded-[1.5rem] border border-border/60 bg-card/75 p-4">
-              <Input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by room name"
-                className="border-0 px-0"
-              />
-            </div>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-            <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                Status
-              </label>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All statuses" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="closed">Closed</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-                Language
-              </label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="All languages" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All languages</SelectItem>
-                  <SelectItem value="javascript">JavaScript</SelectItem>
-                  <SelectItem value="typescript">TypeScript</SelectItem>
-                  <SelectItem value="python">Python</SelectItem>
-                  <SelectItem value="java">Java</SelectItem>
-                  <SelectItem value="cpp">C++</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Page size
-            </label>
-            <Select value={limit} onValueChange={setLimit}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select page size" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10">10 rooms</SelectItem>
-                <SelectItem value="20">20 rooms</SelectItem>
-                <SelectItem value="30">30 rooms</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setSearch("");
-                setStatus("all");
-                setLanguage("all");
-                setLimit("10");
-              }}
-            >
-              Reset filters
-            </Button>
-            <Button onClick={() => setIsFilterPanelOpen(false)}>Apply</Button>
-          </div>
-        </div>
-      </SlideOver>
-
       <section className="relative overflow-hidden rounded-[2.5rem] border border-border/60 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.18),transparent_30%),linear-gradient(180deg,rgba(255,255,255,0.96),rgba(248,250,252,0.98))] p-6 shadow-[0_32px_120px_-48px_rgba(15,23,42,0.45)] md:p-8">
         <div className="absolute inset-x-0 top-0 h-36 bg-[linear-gradient(90deg,rgba(249,115,22,0.08),rgba(14,165,233,0.07),rgba(16,185,129,0.07))]" />
 
-        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_340px]">
+        <div className="relative">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50/85 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-amber-900">
               <Sparkles className="size-3.5" />
@@ -193,30 +107,18 @@ const DashboardPage = () => {
             </p>
           </div>
 
-          <div className="rounded-[2rem] border border-border/60 bg-card/85 p-5 backdrop-blur">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Quick actions
-            </p>
-            <div className="mt-4 space-y-3">
-              <Button size="lg" className="w-full justify-between" asChild>
+          <div className="mt-6 grid gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <Button size="lg" className="w-full sm:w-auto" asChild>
                 <Link href="/dashboard/create-room">
-                  Create a room
                   <Plus className="size-4" />
+                  Create a room
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full justify-between"
-                onClick={() => setIsFilterPanelOpen(true)}
-              >
-                Filter rooms
-                <Filter className="size-4" />
-              </Button>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:w-auto">
                 <div className="rounded-2xl border border-border/60 bg-background/75 p-4">
                   <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
-                    Visible
+                    Total
                   </p>
                   <p className="mt-2 text-2xl font-semibold text-foreground">
                     {rooms.length}
@@ -237,19 +139,93 @@ const DashboardPage = () => {
       </section>
 
       <section className="mt-8">
-        <div className="mb-5 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              Your rooms
-            </p>
-            <h2 className="mt-2 font-heading text-3xl font-semibold text-foreground">
-              Pick up where you left off
-            </h2>
+        <div className="mb-6">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                Your rooms
+              </p>
+              <h2 className="mt-2 font-heading text-3xl font-semibold text-foreground">
+                Pick up where you left off
+              </h2>
+            </div>
           </div>
-          <div className="hidden rounded-full border border-border/70 bg-card/80 px-4 py-2 text-xs uppercase tracking-[0.18em] text-muted-foreground sm:block">
-            {deferredSearch?.trim()
-              ? `Search: ${deferredSearch.trim()}`
-              : "All room names"}
+
+          <div className="rounded-[2rem] border border-border/60 bg-card/85 p-4 backdrop-blur">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 items-end">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  Search
+                </label>
+                <Input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by room name"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  Status
+                </label>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="All statuses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All statuses</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  Language
+                </label>
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="All languages" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All languages</SelectItem>
+                    <SelectItem value="javascript">JavaScript</SelectItem>
+                    <SelectItem value="typescript">TypeScript</SelectItem>
+                    <SelectItem value="python">Python</SelectItem>
+                    <SelectItem value="java">Java</SelectItem>
+                    <SelectItem value="cpp">C++</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+                  Page size
+                </label>
+                <Select value={limit} onValueChange={setLimit}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select limit" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="10">10 rooms</SelectItem>
+                    <SelectItem value="20">20 rooms</SelectItem>
+                    <SelectItem value="30">30 rooms</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                variant="outline"
+                onClick={handleResetFilters}
+                className="w-full"
+              >
+                <Filter className="size-4" />
+                Reset
+              </Button>
+            </div>
           </div>
         </div>
 

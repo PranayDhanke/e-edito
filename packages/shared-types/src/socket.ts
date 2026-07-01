@@ -21,4 +21,6 @@ export const SocketEvent = {
   WEBRTC_OFFER: "webrtc-offer",
   WEBRTC_ANSWER: "webrtc-answer",
   WEBRTC_ICE_CANDIDATE: "webrtc-ice-candidate",
+  MESSAGE_SEND: "message-send",
+  MESSAGE_CREATED: "message-created",
 };
