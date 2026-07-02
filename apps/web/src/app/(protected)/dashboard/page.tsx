@@ -92,7 +92,7 @@ const DashboardPage = () => {
       <section className="relative overflow-hidden rounded-lg border border-border/40 bg-gradient-to-br from-background/80 via-background to-background/95 p-6 shadow-sm md:p-8">
         <div className="relative">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-primary">
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent/30 bg-accent/5 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-accent">
               <Sparkles className="size-3" />
               Rooms
             </div>
@@ -105,7 +105,7 @@ const DashboardPage = () => {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Button size="lg" className="w-full sm:w-auto" asChild>
+            <Button size="lg" className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-accent-foreground" asChild>
               <Link href="/dashboard/create-room">
                 <Plus className="size-4" />
                 Create Room
@@ -224,8 +224,8 @@ const DashboardPage = () => {
 
         {rooms.length === 0 ? (
           <div className="rounded-lg border border-dashed border-border/60 bg-background/40 p-8 text-center shadow-sm">
-            <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-primary/10">
-              <Code2 className="size-5 text-primary" />
+            <div className="mx-auto flex size-12 items-center justify-center rounded-lg bg-accent/10">
+              <Code2 className="size-5 text-accent" />
             </div>
             <h3 className="mt-4 font-semibold text-foreground">
               No rooms yet
@@ -233,7 +233,7 @@ const DashboardPage = () => {
             <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">
               Create your first collaborative coding room to get started
             </p>
-            <Button className="mt-4" size="sm" asChild>
+            <Button className="mt-4 bg-accent hover:bg-accent/90 text-accent-foreground" size="sm" asChild>
               <Link href="/dashboard/create-room">
                 <Plus className="size-4" />
                 Create First Room
@@ -261,7 +261,7 @@ const DashboardPage = () => {
                         >
                           {room.status}
                         </span>
-                        <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-primary/10 text-primary">
+                        <span className="px-2.5 py-1 text-xs font-medium rounded-md bg-accent/10 text-accent">
                           {room.language}
                         </span>
                       </div>
@@ -323,7 +323,7 @@ const DashboardPage = () => {
                   </div>
 
                   {/* Action button */}
-                  <Button asChild size="sm" className="w-full">
+                  <Button asChild size="sm" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
                     <Link href={`/dashboard/workspace/${room.room_code}?role=owner`}>
                       <ArrowRight className="size-3.5" />
                       Open Room
