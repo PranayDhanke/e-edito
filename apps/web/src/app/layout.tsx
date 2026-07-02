@@ -52,10 +52,10 @@ export default function RootLayout({
           playfairDisplayHeading.variable,
         )}
       >
-        <body className="h-screen flex flex-col overflow-hidden">
+        <body className="h-screen flex flex-col ">
           <Navbar />
 
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 ">
             {children}
           </div>
           <Toaster />
