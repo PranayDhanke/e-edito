@@ -151,7 +151,12 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
+
+  *:focus-visible {
+    @apply outline-2 outline-ring outline-offset-2;
+  }
+
   body {
     @apply bg-background text-foreground;
     background-image:
@@ -159,10 +164,122 @@
       radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 20rem),
       linear-gradient(180deg, rgba(255, 251, 235, 0.55), rgba(255, 255, 255, 0));
     background-attachment: fixed;
-    }
+  }
+
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
+  }
+
+  /* Accessibility: Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
+  }
+
+  /* Improved focus styles for keyboard navigation */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring rounded;
+  }
+
+  /* Link styles */
+  a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Button hover/active states */
+  button {
+    @apply transition-all duration-200;
+  }
+
+  /* Input focus states */
+  input:focus,
+  select:focus,
+  textarea:focus {
+    @apply ring-2 ring-ring/20;
+  }
+}
+
+@layer components {
+  /* Smooth transitions */
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Hover lift effect */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  /* Focus ring for interactive elements */
+  .focus-ring {
+    @apply focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring;
+  }
+
+  /* Screen reader only text */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+
+  /* Loading skeleton */
+  .animate-skeleton {
+    @apply bg-gradient-to-r from-background via-background/50 to-background bg-[length:200%_100%] animate-pulse;
+  }
+
+  /* Pulse indicator (for connection status) */
+  .pulse-dot {
+    @apply relative inline-flex;
+  }
+
+  .pulse-dot::after {
+    content: '';
+    @apply absolute inset-0 rounded-full bg-current animate-pulse;
+  }
+
+  /* Smooth fade in */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  /* Subtle scale hover */
+  .scale-hover {
+    @apply transition-transform duration-200 hover:scale-105;
+  }
+
+  /* Disabled state styles */
+  .disabled\:pointer-events-none:disabled {
+    @apply pointer-events-none;
+  }
+
+  .disabled\:opacity-50:disabled {
+    @apply opacity-50;
+  }
 }
 
 .remote-cursor {
