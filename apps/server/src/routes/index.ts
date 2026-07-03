@@ -6,6 +6,7 @@ import roomRouter from "../modules/room/room.route";
 import logsRouter from "../modules/activity_logs/activity_log.route";
 import messageRouter from "../modules/messages/message.route";
 import versionRouter from "../modules/versions/version.route";
+import executionRouter from "../modules/execution/execution.route";
 
 const router: Router = Router();
 
@@ -20,5 +21,7 @@ router.use("/logs", logsRouter);
 router.use("/messages", messageRouter);
 
 router.use("/versions", versionRouter);
+
+router.use("/execute", executionRouter);
 
 export default router;

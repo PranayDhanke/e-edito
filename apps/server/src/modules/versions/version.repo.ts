@@ -41,7 +41,12 @@ const getVersions = async (roomCode: string, filter: cursorFilters) => {
   };
 };
 
+const getVersionById = async (versionId: string) => {
+  return VersionCodeModel.findById(versionId).lean();
+};
+
 export const versionRepo = {
   addVersionRepo,
   getVersions,
+  getVersionById,
 };

@@ -59,7 +59,32 @@ const getVersionService = async (
   return res;
 };
 
+const restoreVersionService = async (versionId: string, userId: string) => {
+  const version = await versionRepo.getVersionById(versionId);
+
+  if (!version) {
+    throw new AppError(404, "Version not found");
+  }
+
+  const logRes = await LogService.addLogService({
+    action: "VERSION_RESTORED",
+    room_code: version.room_code,
+    user_id: userId,
+    metadata: {
+      version_id: version._id,
+      version_name: version.name,
+    },
+  });
+
+  if (!logRes) {
+    throw new AppError(500, "failed to create version restore log");
+  }
+
+  return version;
+};
+
 export const versionService = {
   addVersionService,
   getVersionService,
+  restoreVersionService,
 };

@@ -1,6 +1,8 @@
 "use client";
 
 import { useGetRoomVersions } from "@/api/hooks/version/getVersions";
+import { Button } from "@/components/ui/button";
+import { RotateCcw } from "lucide-react";
 
 const formatDate = (value?: string) => {
   if (!value) {
@@ -13,7 +15,17 @@ const formatDate = (value?: string) => {
   }).format(new Date(value));
 };
 
-const RoomVersions = ({ roomCode }: { roomCode: string }) => {
+const RoomVersions = ({
+  roomCode,
+  onLoadVersion,
+  selectedVersionId,
+  loadingVersionId,
+}: {
+  roomCode: string;
+  onLoadVersion?: (versionId: string) => void;
+  selectedVersionId?: string | null;
+  loadingVersionId?: string | null;
+}) => {
   const { data, isLoading, error } = useGetRoomVersions(roomCode);
 
   if (isLoading) {
@@ -53,11 +65,15 @@ const RoomVersions = ({ roomCode }: { roomCode: string }) => {
         {data?.versions?.map((version) => (
           <article
             key={version._id}
-            className="rounded-md border border-border/30 bg-background/60 hover:bg-background/80 transition-colors p-3 text-xs cursor-pointer group"
+            className={`rounded-xl border p-3 text-xs transition-colors group ${
+              selectedVersionId === version._id
+                ? "border-primary/50 bg-primary/10"
+                : "border-border/30 bg-background/60 hover:bg-background/80"
+            }`}
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0 flex-1">
-                <p className="font-medium text-foreground truncate">
+                <p className="font-medium text-foreground truncate text-sm">
                   {version.name}
                 </p>
                 <p className="text-muted-foreground mt-0.5 line-clamp-1">
@@ -70,6 +86,22 @@ const RoomVersions = ({ roomCode }: { roomCode: string }) => {
             </div>
             <div className="mt-1 font-mono text-xs text-muted-foreground truncate">
               {version.code.slice(0, 60)}...
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <span className="text-[11px] text-muted-foreground">
+                {version.language}
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={() => onLoadVersion?.(version._id)}
+                disabled={loadingVersionId === version._id}
+                className="h-7 gap-1.5 rounded-lg"
+              >
+                <RotateCcw className="size-3.5" />
+                {loadingVersionId === version._id ? "Loading..." : "Load"}
+              </Button>
             </div>
           </article>
         ))}

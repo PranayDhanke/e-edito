@@ -1,43 +1,67 @@
 "use client";
 
 import { useGetRoom } from "@/api/hooks/room/getRoomDetail";
-import { cn } from "@/lib/utils";
-import { useCallback, useEffect, useState } from "react";
-import { useSocket } from "@/socket/socket-provider";
-import { Member, SocketEvent } from "@repo/shared-types";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
-import { Copy, LogOut } from "lucide-react";
-import { toast } from "sonner";
 import { useLeaveRoom } from "@/api/hooks/room/leaveRoom";
-import InviteButton from "@/components/rooms/InviteButton";
-import { Button } from "@/components/ui/button";
-import RoomVersions from "@/components/rooms/RoomVersions";
-import MonacoEditor from "@/components/rooms/Editor";
-import { RoomToolsPanel } from "@/components/rooms/RoomToolsPanel";
+import { executionService } from "@/api/services/executionService";
+import { versionService } from "@/api/services/versionService";
+import { ConsolePanelPro } from "@/components/ide/ConsolePanelPro";
 import { IDELayout } from "@/components/ide/IDELayout";
-import { IDEToolbar } from "@/components/ide/IDEToolbar";
-import { IDESidebar } from "@/components/ide/IDESidebar";
 import { IDERightPanel } from "@/components/ide/IDERightPanel";
+import { IDESidebar } from "@/components/ide/IDESidebar";
+import { IDEToolbar } from "@/components/ide/IDEToolbar";
+import MonacoEditor, { EditorController } from "@/components/rooms/Editor";
 import Participant from "@/components/rooms/Participant";
-import { RoomMessages } from "@/components/rooms/RoomMessages";
 import RoomCall from "@/components/rooms/RoomCall";
+import { RoomMessages } from "@/components/rooms/RoomMessages";
+import { RoomToolsPanel } from "@/components/rooms/RoomToolsPanel";
+import RoomVersions from "@/components/rooms/RoomVersions";
+import { useSocket } from "@/socket/socket-provider";
+import { useAuth, useUser } from "@clerk/nextjs";
+import { Member, SocketEvent } from "@repo/shared-types";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
-const statCardStyles = [
-  "from-[#fff3d6] via-[#fff8ea] to-[#fffef8] text-amber-950",
-  "from-[#dff4ff] via-[#eef9ff] to-[#f8fdff] text-sky-950",
-  "from-[#e8f7e8] via-[#f2fcf2] to-[#fbfffb] text-emerald-950",
-  "from-[#f4ecff] via-[#faf6ff] to-[#fffaff] text-violet-950",
-];
+type ConsoleLine = {
+  id: string;
+  type: "log" | "error" | "warning" | "info" | "success";
+  message: string;
+  timestamp: Date;
+};
+
+const timestampLabel = () =>
+  new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date());
+
+const mapExecutionType = (
+  type: "stdout" | "stderr" | "system" | "success" | "error",
+): ConsoleLine["type"] => {
+  switch (type) {
+    case "stderr":
+    case "error":
+      return "error";
+    case "success":
+      return "success";
+    case "system":
+      return "info";
+    default:
+      return "log";
+  }
+};
 
 const RoomWorkspace = () => {
-  //userId
   const { user, isSignedIn } = useUser();
+  const { getToken } = useAuth();
   const router = useRouter();
-
-  //get the search parasm and param
+  const queryClient = useQueryClient();
   const param = useParams();
   const queryParams = useSearchParams();
+  const socket = useSocket();
 
   const [participants, setParticipants] = useState<Member[]>([]);
   const [initialCode, setInitialCode] = useState<Uint8Array>();
@@ -46,21 +70,32 @@ const RoomWorkspace = () => {
     "invite",
   );
   const [isConnected, setIsConnected] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
-  const [bottomPanelCollapsed, setBottomPanelCollapsed] = useState(false);
+  const [consoleOutput, setConsoleOutput] = useState<ConsoleLine[]>([
+    {
+      id: crypto.randomUUID(),
+      type: "info",
+      message: "Ready. Save a version or run the current file.",
+      timestamp: new Date(),
+    },
+  ]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isSavingVersion, setIsSavingVersion] = useState(false);
+  const [loadingVersionId, setLoadingVersionId] = useState<string | null>(null);
+  const [selectedVersionId, setSelectedVersionId] = useState<string | null>(
+    null,
+  );
+  const editorControllerRef = useRef<EditorController | null>(null);
 
   const room_code = param.roomId?.[0] as string;
-
   const role = queryParams.get("role") || "viewer";
 
-  const socket = useSocket();
-
   const { data, isLoading, error } = useGetRoom(room_code);
-
   const [isLeaving, setIsLeaving] = useState(false);
-
   const { mutateAsync } = useLeaveRoom();
+
+  const appendConsole = useCallback((lines: ConsoleLine[]) => {
+    setConsoleOutput((current) => [...current, ...lines]);
+  }, []);
 
   const handleLeaveRoom = async () => {
     if (!room_code || !user?.id || isLeaving) {
@@ -71,11 +106,8 @@ const RoomWorkspace = () => {
 
     try {
       await mutateAsync(room_code);
-
       socket?.emit(SocketEvent.LEAVE_ROOM);
-
       toast.success("You left the room");
-
       router.push("/dashboard");
     } catch (leaveError) {
       toast.error(
@@ -88,17 +120,6 @@ const RoomWorkspace = () => {
     }
   };
 
-  const handleSocketError = useCallback((payload: unknown) => {
-    console.log("socket error", payload);
-  }, []);
-
-  const handleRoomJoin = useCallback(
-    async (participant: Member[]) => {
-      setParticipants(participant);
-    },
-    [],
-  );
-
   const handleInitialCode = (update: Uint8Array) => {
     setInitialCode(update);
   };
@@ -110,6 +131,20 @@ const RoomWorkspace = () => {
 
     const handleConnect = () => setIsConnected(true);
     const handleDisconnect = () => setIsConnected(false);
+    const handleSocketError = (payload: unknown) => {
+      console.error("socket error", payload);
+      appendConsole([
+        {
+          id: crypto.randomUUID(),
+          type: "error",
+          message: "Socket connection reported an error.",
+          timestamp: new Date(),
+        },
+      ]);
+    };
+    const handleRoomJoin = (participant: Member[]) => {
+      setParticipants(participant);
+    };
 
     socket.on(SocketEvent.ERROR, handleSocketError);
     socket.on(SocketEvent.ROOM_JOINED, handleRoomJoin);
@@ -118,7 +153,6 @@ const RoomWorkspace = () => {
     socket.on("disconnect", handleDisconnect);
 
     if (socket.connected) {
-      setIsConnected(true);
       socket.emit(SocketEvent.JOIN_ROOM, { room_code, role });
     } else {
       socket.once("connect", () => {
@@ -134,9 +168,166 @@ const RoomWorkspace = () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
     };
-  }, [handleRoomJoin, handleSocketError, role, room_code, socket]);
+  }, [appendConsole, role, room_code, socket]);
 
-  if (isLoading && !participants && !initialCode) {
+  const handleSaveVersion = async () => {
+    if (!room_code || !data?.language) {
+      return;
+    }
+
+    const code = editorControllerRef.current?.getCode()?.trim();
+
+    if (!code) {
+      toast.error("Nothing to save yet");
+      return;
+    }
+
+    const token = await getToken();
+
+    if (!token) {
+      toast.error("Authentication token not available");
+      return;
+    }
+
+    setIsSavingVersion(true);
+
+    try {
+      const payload = await versionService.createVersion(token, {
+        room_code,
+        code,
+        language: data.language,
+        name: `Snapshot ${timestampLabel()}`,
+        reason: "Manual save from workspace toolbar",
+      });
+
+      setSelectedVersionId(payload.data._id);
+      await queryClient.invalidateQueries({
+        queryKey: ["room-versions", room_code],
+      });
+
+      toast.success("Version saved");
+      appendConsole([
+        {
+          id: crypto.randomUUID(),
+          type: "success",
+          message: `Saved version "${payload.data.name}".`,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (saveError) {
+      toast.error(
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to save version",
+      );
+    } finally {
+      setIsSavingVersion(false);
+    }
+  };
+
+  const handleLoadVersion = async (versionId: string) => {
+    const token = await getToken();
+
+    if (!token) {
+      toast.error("Authentication token not available");
+      return;
+    }
+
+    setLoadingVersionId(versionId);
+
+    try {
+      const payload = await versionService.restoreVersion(token, versionId);
+      editorControllerRef.current?.replaceCode(payload.data.code);
+      setSelectedVersionId(versionId);
+      toast.success(`Loaded "${payload.data.name}"`);
+      appendConsole([
+        {
+          id: crypto.randomUUID(),
+          type: "info",
+          message: `Loaded version "${payload.data.name}" into the editor.`,
+          timestamp: new Date(),
+        },
+      ]);
+    } catch (loadError) {
+      toast.error(
+        loadError instanceof Error
+          ? loadError.message
+          : "Failed to load version",
+      );
+    } finally {
+      setLoadingVersionId(null);
+    }
+  };
+
+  const handleRunCode = async () => {
+    if (!room_code || !data?.language) {
+      return;
+    }
+
+    const code = editorControllerRef.current?.getCode() || "";
+
+    if (!code.trim()) {
+      toast.error("Editor is empty");
+      return;
+    }
+
+    const token = await getToken();
+
+    if (!token) {
+      toast.error("Authentication token not available");
+      return;
+    }
+
+    setIsRunning(true);
+    setConsoleOutput([
+      {
+        id: crypto.randomUUID(),
+        type: "info",
+        message: `Running ${data.language} in Docker...`,
+        timestamp: new Date(),
+      },
+    ]);
+
+    try {
+      const result = await executionService.runCode(token, {
+        room_code,
+        language: data.language,
+        code,
+      });
+
+      setConsoleOutput(
+        result.output.map((line, index) => ({
+          id: `${result.jobId}-${index}`,
+          type: mapExecutionType(line.type),
+          message: line.message,
+          timestamp: new Date(line.timestamp),
+        })),
+      );
+
+      if (result.status === "completed") {
+        toast.success("Execution finished");
+      } else {
+        toast.error("Execution finished with errors");
+      }
+    } catch (runError) {
+      setConsoleOutput([
+        {
+          id: crypto.randomUUID(),
+          type: "error",
+          message:
+            runError instanceof Error ? runError.message : "Failed to run code",
+          timestamp: new Date(),
+        },
+      ]);
+      toast.error(runError instanceof Error ? runError.message : "Run failed");
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
+  const connectionState = socket?.connected ?? isConnected;
+
+  if (isLoading && !participants.length && !initialCode) {
     return (
       <div className="min-h-[70vh] rounded-[2rem] border border-border/60 bg-card/70 p-8 shadow-sm">
         <p className="text-sm text-muted-foreground">
@@ -145,29 +336,6 @@ const RoomWorkspace = () => {
       </div>
     );
   }
-
-  const stats = [
-    {
-      label: "Language",
-      value: data?.language || "Unknown",
-      helper: "Editor runtime",
-    },
-    {
-      label: "Status",
-      value: data?.status || "Unknown",
-      helper: "Current room state",
-    },
-    {
-      label: "Participants",
-      value: `${participants.length}/${data?.maxParticipants || 0}`,
-      helper: "Live seats in use",
-    },
-    {
-      label: "Visibility",
-      value: data?.is_public ? "Public" : "Private",
-      helper: "Join access mode",
-    },
-  ];
 
   if (error) {
     return (
@@ -205,39 +373,49 @@ const RoomWorkspace = () => {
             roomCode={room_code}
             roomName={data?.name || "Unnamed Room"}
             language={data?.language || "Unknown"}
-            isConnected={isConnected}
+            isConnected={connectionState}
             participantCount={participants.length}
-            onRun={() => {
-              console.log("[v0] Running code");
-            }}
-            onSave={() => {
-              console.log("[v0] Saving version");
-            }}
+            onRun={handleRunCode}
+            onSave={handleSaveVersion}
             onShare={() => {
               setToolsDefaultTab("invite");
               setIsToolsPanelOpen(true);
             }}
             onLeave={handleLeaveRoom}
             isOwner={data?.owner_id === user?.id}
+            isRunning={isRunning}
+            isSaving={isSavingVersion}
           />
         }
         sidebar={
           <IDESidebar
             language={data?.language}
             roomCode={room_code}
-            versionHistory={<RoomVersions roomCode={room_code} />}
+            versionHistory={
+              <RoomVersions
+                roomCode={room_code}
+                onLoadVersion={handleLoadVersion}
+                selectedVersionId={selectedVersionId}
+                loadingVersionId={loadingVersionId}
+              />
+            }
           />
         }
         editor={
           !initialCode ? (
-            <div className="flex items-center justify-center h-full">
+            <div className="flex items-center justify-center h-full bg-[#0b1220]">
               <div className="text-center">
-                <div className="animate-spin w-8 h-8 rounded-full border-2 border-border border-t-primary mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">Loading editor...</p>
+                <div className="animate-spin w-8 h-8 rounded-full border-2 border-slate-600 border-t-cyan-400 mx-auto mb-3" />
+                <p className="text-sm text-slate-300">Loading editor...</p>
               </div>
             </div>
           ) : (
-            <MonacoEditor initialCode={initialCode} />
+            <MonacoEditor
+              initialCode={initialCode}
+              onReady={(controller) => {
+                editorControllerRef.current = controller;
+              }}
+            />
           )
         }
         rightPanel={
@@ -250,7 +428,9 @@ const RoomWorkspace = () => {
                 participants={participants}
               />
             }
-            messages={<RoomMessages roomCode={room_code} currentUserId={user?.id} />}
+            messages={
+              <RoomMessages roomCode={room_code} currentUserId={user?.id} />
+            }
             video={
               data?.is_audio_enabled || data?.is_video_enabled ? (
                 <RoomCall
@@ -264,24 +444,15 @@ const RoomWorkspace = () => {
           />
         }
         bottomPanel={
-          <div className="flex flex-col h-full bg-background overflow-hidden">
-            <div className="px-4 py-2 border-b border-border/30 bg-background/50 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xs font-semibold uppercase tracking-wider">Console Output</h3>
-                <span className="text-xs text-muted-foreground">0 lines</span>
-              </div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-3 font-mono text-xs text-muted-foreground">
-              <div className="text-slate-500">$ Ready to execute code</div>
-            </div>
-          </div>
+          <ConsolePanelPro
+            output={consoleOutput}
+            isRunning={isRunning}
+            onClear={() => setConsoleOutput([])}
+          />
         }
-        onSidebarCollapse={setSidebarCollapsed}
-        onRightPanelCollapse={setRightPanelCollapsed}
-        onBottomPanelCollapse={setBottomPanelCollapsed}
-        defaultSidebarWidth={280}
+        defaultSidebarWidth={300}
         defaultRightPanelWidth={320}
-        defaultBottomPanelHeight={200}
+        defaultBottomPanelHeight={220}
       />
     </>
   );

@@ -42,3 +42,23 @@ export const getVersionHandler = async (req: Request, res: Response) => {
     data: versions,
   });
 };
+
+export const restoreVersionHandler = async (req: Request, res: Response) => {
+  const userId = req.userId;
+  const versionId = req.params.versionId as string;
+
+  if (!userId?.trim()) {
+    throw new AppError(401, "Unauthorized");
+  }
+
+  if (!versionId?.trim()) {
+    throw new AppError(400, "Version id is required");
+  }
+
+  const version = await versionService.restoreVersionService(versionId, userId);
+
+  res.status(200).json({
+    success: true,
+    data: version,
+  });
+};

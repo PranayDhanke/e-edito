@@ -8,6 +8,7 @@ export const activityActionEnum = z.enum([
   "USER_JOINED",
   "USER_LEFT",
   "VERSION_CREATED",
+  "VERSION_RESTORED",
   "PARTICIPANT_REMOVED",
   "PARTICIPANT_ROLE_CHANGED",
   "USER_BANNED",

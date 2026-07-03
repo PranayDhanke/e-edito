@@ -17,7 +17,7 @@ const getRoomRepo = async (roomCode: string) => {
 //creating a repo function to get the rooms detail for user
 const getRoomIdRepo = async (userId: string, filter: RoomFilters) => {
   //creating a query record to find the filter data
-  const query: QueryFilter<FilterRoomDocs> = {};
+  const query: Record<string, unknown> = { owner_id: userId };
 
   //cursor
   if (filter.cursor) {
@@ -43,9 +43,6 @@ const getRoomIdRepo = async (userId: string, filter: RoomFilters) => {
   if (filter.language) {
     query.language = filter.language;
   }
-
-  //set user id
-  query.owner_id = userId;
 
   //take the page and limit
   const limit = filter.limit || 10;

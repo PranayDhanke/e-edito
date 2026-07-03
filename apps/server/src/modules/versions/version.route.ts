@@ -3,7 +3,11 @@ import { requireAuth } from "../../middlewares/authMiddleware";
 import { validate } from "../../middlewares/validateMiddleware";
 import { createVersionCodeFormSchema } from "@repo/validation";
 import { handlerFunc } from "../../utils/asyncHandler";
-import { addVersionHandler, getVersionHandler } from "./version.handler";
+import {
+  addVersionHandler,
+  getVersionHandler,
+  restoreVersionHandler,
+} from "./version.handler";
 
 const router: Router = Router();
 
@@ -14,6 +18,8 @@ router.post(
   validate(createVersionCodeFormSchema),
   handlerFunc(addVersionHandler),
 );
+
+router.post("/:versionId/restore", handlerFunc(restoreVersionHandler));
 
 router.get("/:roomCode", handlerFunc(getVersionHandler));
 

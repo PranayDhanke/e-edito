@@ -2,12 +2,16 @@
 
 import * as Y from "yjs";
 import Editor, { OnMount } from "@monaco-editor/react";
-import { useEffect, useRef } from "react";
-import { editor } from "monaco-editor";
+import { useEffect, useState } from "react";
 import { useSocket } from "@/socket/socket-provider";
 import { SocketEvent } from "@repo/shared-types";
 import { Awareness } from "y-protocols/awareness";
 import { useUser } from "@clerk/nextjs";
+
+export interface EditorController {
+  getCode: () => string;
+  replaceCode: (nextCode: string) => void;
+}
 
 const toUint8Array = (value: unknown) => {
   if (value instanceof Uint8Array) {
@@ -36,17 +40,21 @@ const toUint8Array = (value: unknown) => {
   return null;
 };
 
-const MonacoEditor = ({ initialCode }: { initialCode: Uint8Array }) => {
+const MonacoEditor = ({
+  initialCode,
+  onReady,
+}: {
+  initialCode: Uint8Array;
+  onReady?: (controller: EditorController) => void;
+}) => {
   //socket
   const socket = useSocket();
   const { user, isSignedIn } = useUser();
 
-  //creating yjs docs
-  const doc = useRef(new Y.Doc()).current;
+  const [doc] = useState(() => new Y.Doc());
   const yText = doc.getText("editor");
 
-  //awareness instance
-  const awareness = useRef(new Awareness(doc)).current;
+  const [awareness] = useState(() => new Awareness(doc));
 
   useEffect(() => {
     if (!user || !isSignedIn) return;
@@ -56,17 +64,7 @@ const MonacoEditor = ({ initialCode }: { initialCode: Uint8Array }) => {
       name: user.fullName,
       color: "#3b82f6",
     });
-  }, [user, isSignedIn]);
-
-  const handleRemoteUpdate = (code: any) => {
-    const update = toUint8Array(code);
-
-    if (!update) {
-      return;
-    }
-
-    Y.applyUpdate(doc, update, "remote-sync");
-  };
+  }, [awareness, user, isSignedIn]);
 
   useEffect(() => {
     if (!initialCode) return;
@@ -81,14 +79,42 @@ const MonacoEditor = ({ initialCode }: { initialCode: Uint8Array }) => {
   }, [doc, initialCode]);
 
   const handleAwarenessChange = () => {
-    
   };
+
+  useEffect(() => {
+    if (!onReady) {
+      return;
+    }
+
+    onReady({
+      getCode: () => yText.toString(),
+      replaceCode: (nextCode: string) => {
+        doc.transact(() => {
+          yText.delete(0, yText.length);
+          yText.insert(0, nextCode);
+        }, "restore-version");
+      },
+    });
+  }, [doc, onReady, yText]);
 
   useEffect(() => {
     if (!socket) return;
 
+    const handleRemoteUpdate = (code: unknown) => {
+      const update = toUint8Array(code);
+
+      if (!update) {
+        return;
+      }
+
+      Y.applyUpdate(doc, update, "remote-sync");
+    };
+
     const handleUpdate = (code: Uint8Array, origin: unknown) => {
-      if (origin === "initial-sync" || origin === "remote-sync") {
+      if (
+        origin === "initial-sync" ||
+        origin === "remote-sync"
+      ) {
         return;
       }
 
@@ -120,8 +146,8 @@ const MonacoEditor = ({ initialCode }: { initialCode: Uint8Array }) => {
   };
 
   return (
-    <Editor 
-      onMount={handleEditorMount} 
+    <Editor
+      onMount={handleEditorMount}
       height="100%"
       theme="vs-dark"
       options={{
@@ -130,6 +156,9 @@ const MonacoEditor = ({ initialCode }: { initialCode: Uint8Array }) => {
         fontFamily: "'Monaco', 'Menlo', 'Ubuntu Mono', monospace",
         scrollBeyondLastLine: false,
         automaticLayout: true,
+        padding: {
+          top: 16,
+        },
       }}
     />
   );

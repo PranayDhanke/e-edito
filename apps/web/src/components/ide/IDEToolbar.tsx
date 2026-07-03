@@ -1,7 +1,6 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Play,
   Save,
@@ -9,12 +8,8 @@ import {
   Settings,
   LogOut,
   Users,
-  Download,
-  Upload,
   RotateCcw,
-  Share2,
-  FolderOpen,
-  Home,
+  UserPlus,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -83,15 +78,15 @@ export function IDEToolbar({
         </div>
 
         {/* Center: Primary Actions */}
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
           <Button
             size="sm"
             onClick={onRun}
             disabled={isRunning}
-            className="gap-1.5"
+            className="gap-1.5 min-w-[92px] bg-emerald-600 text-white hover:bg-emerald-500"
           >
             <Play className="size-3.5" />
-            <span className="hidden sm:inline">Run</span>
+            <span>{isRunning ? 'Running...' : 'Run'}</span>
           </Button>
 
           <Button
@@ -99,10 +94,10 @@ export function IDEToolbar({
             variant="outline"
             onClick={onSave}
             disabled={isSaving}
-            className="gap-1.5"
+            className="gap-1.5 min-w-[92px]"
           >
             <Save className="size-3.5" />
-            <span className="hidden sm:inline">Save</span>
+            <span>{isSaving ? 'Saving...' : 'Save'}</span>
           </Button>
 
           {onReset && (
@@ -123,13 +118,13 @@ export function IDEToolbar({
           {onShare && (
             <Button
               size="sm"
-              variant="ghost"
+              variant="outline"
               onClick={onShare}
-              title="Share room"
-              className="gap-1.5"
+              title="Invite people"
+              className="gap-1.5 min-w-[92px]"
             >
-              <Share2 className="size-3.5" />
-              <span className="hidden md:inline">Share</span>
+              <UserPlus className="size-3.5" />
+              <span>Invite</span>
             </Button>
           )}
 
